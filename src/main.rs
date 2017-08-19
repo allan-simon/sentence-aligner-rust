@@ -44,6 +44,7 @@ fn main() {
             routes![
                 sentences::create_sentence,
                 sentences::get_sentence,
+                sentences::get_all_sentences,
             ]
         )
         .launch()
