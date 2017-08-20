@@ -15,6 +15,7 @@ struct Sentence {
     id: Option<uuid::Uuid>,
     text: String,
     iso639_3: String,
+    structure: Option<String>,
 }
 
 #[post("/sentences", format="application/json", data="<sentence>")]
@@ -85,7 +86,8 @@ fn get_sentence<'r>(
             SELECT
                 id,
                 content,
-                iso639_3
+                iso639_3,
+                structure::text
             FROM sentence
             WHERE id = $1
         "#,
@@ -111,6 +113,7 @@ fn get_sentence<'r>(
         id: row.get(0),
         text: row.get(1),
         iso639_3: row.get(2),
+        structure: row.get(3),
     };
 
 
@@ -129,7 +132,8 @@ fn get_all_sentences<'r>(
             SELECT
                 id,
                 content,
-                iso639_3
+                iso639_3,
+                structure::text
             FROM sentence
             ORDER BY
                 added_at,
@@ -149,6 +153,7 @@ fn get_all_sentences<'r>(
             id: row.get(0),
             text: row.get(1),
             iso639_3: row.get(2),
+            structure: row.get(3),
         };
         sentences.push(sentence);
     }
@@ -160,6 +165,52 @@ fn get_all_sentences<'r>(
 
 #[put("/sentences/<sentence_uuid>/text", format="text/plain", data="<text>")]
 fn edit_sentence_text<'r>(
+    connection: db::DbConnection,
+    sentence_uuid: UUID,
+    text: String,
+) -> Response<'r> {
+
+    let real_uuid : Uuid = *sentence_uuid;
+
+    let result = connection.execute(
+        r#"
+            UPDATE sentence
+            SET content = $1
+            WHERE id = $2
+        "#,
+        &[
+            &text,
+            &real_uuid,
+        ],
+    );
+
+    let not_found = match result {
+        Ok(nbr_row_updated) => nbr_row_updated == 0,
+        Err(ref e) => {
+            if e.code() == Some(&UNIQUE_VIOLATION) {
+                return  Response::build()
+                    .status(Status::Conflict)
+                    .finalize()
+                ;
+            }
+            panic!(format!("{}", e));
+        }
+    };
+
+    if not_found {
+        return  Response::build()
+            .status(Status::NotFound)
+            .finalize()
+        ;
+    }
+
+    Response::build()
+        .status(Status::NoContent)
+        .finalize()
+}
+
+#[put("/sentences/<sentence_uuid>/structure", format="text/plain", data="<text>")]
+fn edit_sentence_structure<'r>(
     connection: db::DbConnection,
     sentence_uuid: UUID,
     text: String,
