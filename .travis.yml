@@ -14,7 +14,7 @@ rust:
 services:
   - docker
 script:
-  - docker run --user=$UID --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder cargo build --release
+  - docker run --user=$UID --env HOME=/tmp --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder cargo build --release
 after_success:
   - if ([ "$TRAVIS_BRANCH" != "master" ]); then exit 0; fi
   - docker login -e "$DOCKER_EMAIL" -u "$DOCKER_USER" -p "$DOCKER_PASS"
