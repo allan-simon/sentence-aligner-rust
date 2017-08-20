@@ -21,4 +21,4 @@ after_success:
   - export REPO=allansimon/sentence-aligner
   - docker build -f Dockerfile -t "$REPO:$COMMIT" .
   - docker tag "$REPO:$COMMIT" "$REPO:latest"
-  - docker push $REPO
+  - docker push $REPO:latest
