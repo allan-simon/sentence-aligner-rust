@@ -45,6 +45,7 @@ fn main() {
                 sentences::create_sentence,
                 sentences::get_sentence,
                 sentences::get_all_sentences,
+                sentences::edit_sentence_text,
             ]
         )
         .launch()

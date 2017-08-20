@@ -17,7 +17,9 @@ struct Sentence {
     iso639_3: String,
 }
 
-#[post("/sentences", format="application/json", data="<sentence>")] fn create_sentence<'r>( connection: db::DbConnection,
+#[post("/sentences", format="application/json", data="<sentence>")]
+fn create_sentence<'r>(
+    connection: db::DbConnection,
     sentence: Json<Sentence>
 ) -> Response<'r> {
 
@@ -129,6 +131,9 @@ fn get_all_sentences<'r>(
                 content,
                 iso639_3
             FROM sentence
+            ORDER BY
+                added_at,
+                id
             LIMIT 100
         "#,
         &[],
@@ -150,5 +155,51 @@ fn get_all_sentences<'r>(
 
     Response::build()
         .sized_body(Cursor::new(json!(sentences).to_string()))
+        .finalize()
+}
+
+#[put("/sentences/<sentence_uuid>/text", format="text/plain", data="<text>")]
+fn edit_sentence_text<'r>(
+    connection: db::DbConnection,
+    sentence_uuid: UUID,
+    text: String,
+) -> Response<'r> {
+
+    let real_uuid : Uuid = *sentence_uuid;
+
+    let result = connection.execute(
+        r#"
+            UPDATE sentence
+            SET content = $1
+            WHERE id = $2
+        "#,
+        &[
+            &text,
+            &real_uuid,
+        ],
+    );
+
+    let not_found = match result {
+        Ok(nbr_row_updated) => nbr_row_updated == 0,
+        Err(ref e) => {
+            if e.code() == Some(&UNIQUE_VIOLATION) {
+                return  Response::build()
+                    .status(Status::Conflict)
+                    .finalize()
+                ;
+            }
+            panic!(format!("{}", e));
+        }
+    };
+
+    if not_found {
+        return  Response::build()
+            .status(Status::NotFound)
+            .finalize()
+        ;
+    }
+
+    Response::build()
+        .status(Status::NoContent)
         .finalize()
 }
