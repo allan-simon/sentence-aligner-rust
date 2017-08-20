@@ -14,6 +14,7 @@ rust:
 services:
   - docker
 script:
+  - sudo chown -R "$UID:$UID" "$(pwd)"
   - docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder cargo build --release
 after_success:
   - if ([ "$TRAVIS_BRANCH" != "master" ]); then exit 0; fi
