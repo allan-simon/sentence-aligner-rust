@@ -1,0 +1,24 @@
+language: rust
+sudo: required
+env:
+  global:
+    - secure: "kCvCGV6AG0TRsLlJXwTMiNE5/euYoU1aPq0BMdkPFZ+h5aObg2ot4d5Hqt+Myey/GgYbSwd20MJeD6iLKPN3aPxCOo2RsXL9XEjfbQ15SDE6V2Fe5BL5/4UJDaL9Dg93UkrEfWceZqizETqyZz5cnjZDxqhzZC6ooV6nUwLhPiU7M65SqVQSMt1UoQYc32VuSIHsBszogdYmT2vyt4qE2B0TtVdJ6CN0XqUgWk3qpbdYQSonuEZ3GfxCrdcWs+rA6WBjFLj8AkGzK89sN+CiAXysRVEb1BXXFEzXKfoLphk5dc/lzNwC3fdcydr+S+wMA8UXVpvhaoNlo3Ki/5k0LwY+57Pk1kN7G3M3WIS2kHgcSZSKcLQ0VvGhcLVSTVDrLJhOz74YevbQJSPfn7TrbzEkBHXM6tq5k3lbjjS+QXP+KlThjGT8sDSlnbZW+Kjtnm+FVXP2PEkdq8qJYd2+82CxbzpPoD5B4JRVnFMueVH/vLqYjQn9nWD3R20FOoKjsWSW1Jhw1n05gqEsldK8wWVVMqYOqGqkQERoipQhkoUDUIXnJhrh2yZ1PPTjc9vCEg5i0PyZsf1AM43Pbn/szUH1lWeadvk4jvurXK/KRL6dVQ/ZmhykZE1O6m2+wfcEoigozBmARO6UPHrzqQL0jpzTNrZd/w8xdlh4NOLSvuI="
+    - secure: "JU9yr/AACmiofGL2nCIMEKCA1h0/KA4XcCfIRV97VHOtafLdiL5WrUTYufeAQfwDC6CVhZJqbOkmNiyKHJYNNIbhFJ+xE2mSoGAPbsng9eYJX+slcHk82YAdYf64ttrnFAlPYvWg4u1VSq2m9/0/HDrbhl+F5w/ihTU6UwKwFt5fFU840resiQLaOHs68aQb+p5FpcxZ4ynXlNsP0aZiIx2T9DYicI/EsZ+hAKfVL8uIUWI4KW5yfiJt/dBS5DDOne21T7VHvFVF+qjDDdF0/1aA8gR95fTUYLpgwPxYlbXCgKhS6ZVY+vFPklmiOAkiA+Qcnn3ITZ6K/pbH3UYS3/4nzJenPG9HG97auCvzQ3+OlxEUYYOxFOE9r9Jbzdy/mNu5T2x2G4gizj8WVffa39ipnNuNtkMoQ1kgBTHhJMPYSQL7mfQMbc/gmllHh+CTcv9hfEkq8NBer//vO+r3pMg/lMzfjl/pQySN0Gj75ZES84wbX3yEE0VE2xsQKYPv3iNr9xzF+68PaUm+27ZCamqf54EfSfCXEgq4T80c3rJkwSbaITj+ZVry5eVaBMCrST+avw6yIO23FFGGeshJWTsryu2J5dDKYo+YWk6O4ZslZBNilsAk270rDS/pr75DMNafWfS8jYXcnljpKX/nikp0OjcWS5uHycHrN/jRs5w="
+    - secure: "ANDG1jTHTaR9km8YdP0EwvteJOml/4X9sgIgd1FpvQb6XrbewCsAt66yY68OHEJo49N0cOerf3i6kGYG5FcvcPAdEE09WZnwnCoEGc0xemwB12TL2U0X+9A65bBPo1iEfbQFUhkEOWyE/vHebIFx0GwJK+opgxh6yPrUPIfjhgLV7gZlDbdx30Kb54Pr/eKWTLSEYUsWytu58b8vAC07FED/gfCiyhNN8fOtxnL6Lj9x7f+6ntISJ4sRuK+GuCMdBaZbKUEQ+taRVWeybUu+JBlGDMymiOqAgpg7t+V57Egp9CB5OqAnS5UZRyzJNFg0ooc3z1m8xrJmvi9mSfSjDm7E5GgLFYxafdZBDjQbfCUndQ7P5jGgS/FDvUMXue2X1yPC2X1NF88D734vds8zsoeMlNyoS3xPjoiZHgEEu56cuRnWkgugfloXoQM3J5dKa+BPJxksZf/DVBReCJVGOhVLN66ouiRS3quJBa24g5yHfNO0/HVnSiX59u6RAzFean5c5X228jSPMTB/Bt62R4jFxS+NnKBl7mDDKw8zOcx2o2vgsO3pfDn0eI1Rf1/wJjgCWXW+D9I2do04Sxr2UygHqQj4RCVFqJZXStLWtsruiLDWpL8luyX52ioL1b12uAH+/pKLPm70gzL0h2CkWfUX+ASiwPd4EPaVhpICp5k="
+    - COMMIT=${TRAVIS_COMMIT::8}
+
+os:
+  - linux
+rust:
+  - nightly
+services:
+  - docker
+script:
+  - docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder cargo build --release
+after_success:
+  - if ([ "$TRAVIS_BRANCH" != "master" ]); then exit 0; fi
+  - docker login -e "$DOCKER_EMAIL" -u "$DOCKER_USER" -p "$DOCKER_PASS"
+  - export REPO=allansimon/sentence-aligner
+  - docker build -f Dockerfile -t "$REPO:$COMMIT" .
+  - docker tag "$REPO:$COMMIT" "$REPO:latest"
+  - docker push $REPO
