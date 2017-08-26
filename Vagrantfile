@@ -21,7 +21,6 @@ Vagrant.configure(2) do |config|
 
   config.ssh.insert_key = false
   config.vm.define "dev", primary: true do |app|
-    app.vm.network "forwarded_port", guest: 9090, host: 9090
     app.vm.provider "docker" do |d|
       d.image = "allansimon/docker-dev-rust"
 
