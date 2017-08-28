@@ -2,7 +2,6 @@
 #![plugin(rocket_codegen)]
 
 extern crate rocket;
-extern crate serde_json;
 extern crate postgres;
 
 #[macro_use] extern crate rocket_contrib;
@@ -12,6 +11,7 @@ extern crate r2d2;
 extern crate r2d2_postgres;
 
 mod db;
+mod cors;
 mod sentences;
 
 
@@ -38,6 +38,7 @@ fn main() {
     .expect("can't create table sentence");
 
     rocket::ignite()
+        .attach(cors::CORS())
         .manage(pool)
         .mount(
             "/",

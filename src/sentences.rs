@@ -4,6 +4,7 @@ use rocket_contrib::UUID;
 use rocket::Response;
 use rocket_contrib::Json;
 use rocket::http::Status;
+use rocket::http::ContentType;
 use postgres::error::UNIQUE_VIOLATION;
 use self::uuid::Uuid;
 use std::io::Cursor;
@@ -118,6 +119,7 @@ fn get_sentence<'r>(
 
 
     Response::build()
+        .header(ContentType::JSON)
         .sized_body(Cursor::new(json!(sentence).to_string()))
         .finalize()
 }
@@ -159,6 +161,7 @@ fn get_all_sentences<'r>(
     }
 
     Response::build()
+        .header(ContentType::JSON)
         .sized_body(Cursor::new(json!(sentences).to_string()))
         .finalize()
 }
