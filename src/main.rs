@@ -14,6 +14,7 @@ mod db;
 mod cors;
 mod sentences;
 mod one_sentence;
+mod languages;
 
 
 
@@ -49,6 +50,7 @@ fn main() {
                 one_sentence::get_sentence,
                 one_sentence::edit_sentence_text,
                 one_sentence::edit_sentence_structure,
+                languages::get_all_sentences_of_language,
             ]
         )
         .launch()
