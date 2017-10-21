@@ -13,6 +13,7 @@ extern crate r2d2_postgres;
 mod db;
 mod cors;
 mod sentences;
+mod one_sentence;
 
 
 
@@ -44,10 +45,10 @@ fn main() {
             "/",
             routes![
                 sentences::create_sentence,
-                sentences::get_sentence,
                 sentences::get_all_sentences,
-                sentences::edit_sentence_text,
-                sentences::edit_sentence_structure,
+                one_sentence::get_sentence,
+                one_sentence::edit_sentence_text,
+                one_sentence::edit_sentence_structure,
             ]
         )
         .launch()
