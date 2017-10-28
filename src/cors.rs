@@ -21,7 +21,8 @@ impl Fairing for CORS {
             response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
         }
 
-        if request.method() == Method::Options {
+        if request.method() == Method::Options && request.route().is_none(){
+            response.set_status(Status::NoContent);
             response.set_header(ContentType::Plain);
             response.set_sized_body(Cursor::new(""));
         }
