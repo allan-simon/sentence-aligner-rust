@@ -50,6 +50,7 @@ fn main() {
                 one_sentence::get_sentence,
                 one_sentence::edit_sentence_text,
                 one_sentence::edit_sentence_structure,
+                one_sentence::edit_sentence_language,
                 languages::get_all_sentences_of_language,
             ]
         )

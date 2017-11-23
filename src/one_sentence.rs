@@ -155,3 +155,41 @@ fn edit_sentence_structure<'r>(
         .status(Status::NoContent)
         .finalize()
 }
+
+#[put("/sentences/<sentence_uuid>/language", format="text/plain", data="<text>")]
+fn edit_sentence_language<'r>(
+    connection: db::DbConnection,
+    sentence_uuid: UUID,
+    text: String,
+) -> Response<'r> {
+
+    let real_uuid : Uuid = *sentence_uuid;
+
+    let result = connection.execute(
+        r#"
+            UPDATE sentence
+            SET iso639_3 = $1
+            WHERE id = $2
+        "#,
+        &[
+            &text,
+            &real_uuid,
+        ],
+    );
+
+    let status = match result {
+        Ok(nbr_row_updated) if nbr_row_updated == 1 => {
+            Status::NoContent
+        },
+        Ok(_) => {
+            Status::NotFound
+        },
+        Err(ref e) => {
+            panic!(format!("{}", e));
+        }
+    };
+
+    return Response::build()
+        .status(status)
+        .finalize()
+}
