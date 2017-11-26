@@ -40,5 +40,13 @@ Vagrant.configure(2) do |config|
       }
     end
     app.ssh.username = "vagrant"
+
+    # libssl-dev is required by reqwest when testing
+    app.vm.provision "installs", "type": "shell" do |installs|
+      installs.inline = "
+        sudo apt-get update
+        sudo apt-get install pkg-config libssl-dev -y
+      "
+    end
   end
 end
