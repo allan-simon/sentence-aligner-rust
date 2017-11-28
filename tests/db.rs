@@ -1,4 +1,5 @@
 extern crate postgres;
+extern crate uuid;
 
 use std::env;
 
@@ -44,4 +45,39 @@ pub fn get_connection() -> Connection {
 pub fn clear(connection: &Connection) {
 
     connection.execute("TRUNCATE TABLE sentence;", &[]).unwrap();
+}
+
+/// Inserts one sentence into the table 'sentence'
+///
+/// # Arguments:
+///
+/// `connection` - The PostgreSQL connection object
+/// `uuid` - The sentence UUID v4
+/// `content` - The sentence itself
+/// `iso639_3` - The sentence language
+pub fn insert_sentence(
+    connection: &Connection,
+    uuid: &uuid::Uuid,
+    content: &str,
+    iso639_3: &str,
+) {
+
+    connection.execute(
+        r#"
+        INSERT INTO sentence(
+            id,
+            content,
+            iso639_3
+        ) VALUES (
+            $1,
+            $2,
+            $3
+        )
+        "#,
+        &[
+            &uuid,
+            &content,
+            &iso639_3,
+        ]
+    );
 }
