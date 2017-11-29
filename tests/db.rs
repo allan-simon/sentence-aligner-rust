@@ -56,9 +56,9 @@ pub fn clear(connection: &Connection) {
 /// `content` - The sentence itself
 /// `iso639_3` - The sentence language
 ///
-/// NOTE: allow `unused_must_use` because we don't need to get the result of execute(),
-/// allow `dead_code` as this function is only used by the tests
-#[allow(unused_must_use, dead_code)]
+/// NOTE: allow dead_code to prevent cargo test incorrect warnings
+/// (https://github.com/rust-lang/rust/issues/46379)
+#[allow(dead_code)]
 pub fn insert_sentence(
     connection: &Connection,
     uuid: &uuid::Uuid,
@@ -66,7 +66,7 @@ pub fn insert_sentence(
     iso639_3: &str,
 ) {
 
-    connection.execute(
+    let _ = connection.execute(
         r#"
         INSERT INTO sentence(
             id,
