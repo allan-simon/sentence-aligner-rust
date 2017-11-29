@@ -55,6 +55,10 @@ pub fn clear(connection: &Connection) {
 /// `uuid` - The sentence UUID v4
 /// `content` - The sentence itself
 /// `iso639_3` - The sentence language
+///
+/// NOTE: allow `unused_must_use` because we don't need to get the result of execute(),
+/// allow `dead_code` as this function is only used by the tests
+#[allow(unused_must_use, dead_code)]
 pub fn insert_sentence(
     connection: &Connection,
     uuid: &uuid::Uuid,
