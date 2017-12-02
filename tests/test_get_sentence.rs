@@ -15,7 +15,7 @@ pub struct Sentence {
     pub structure: Option<String>,
 }
 
-static SERVICE_URL: &'static str = "http://localhost:8000";
+const SERVICE_URL: &str = "http://localhost:8000";
 
 #[test]
 fn test_get_sentence_if_exists_returns_200() {
