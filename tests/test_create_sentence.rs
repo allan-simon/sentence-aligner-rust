@@ -7,6 +7,8 @@ use reqwest::StatusCode;
 
 mod db;
 
+const SERVICE_URL: &str = "http://localhost:8000/";
+
 #[test]
 fn test_post_sentence_returns_200() {
 
@@ -18,7 +20,12 @@ fn test_post_sentence_returns_200() {
     json.insert("iso639_3", "eng");
 
     let client = reqwest::Client::new();
-    let response = client.post("http://localhost:8000/sentences")
+
+    let url = format!(
+        "{}/sentences",
+        SERVICE_URL,
+    );
+    let response = client.post(&url)
         .json(&json)
         .send()
         .unwrap();
@@ -36,7 +43,7 @@ fn test_post_sentence_with_used_uuid_returns_409() {
     db::clear(&connection);
 
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
+    let sentence_text = "This is one sentence.";
     let sentence_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
@@ -47,11 +54,16 @@ fn test_post_sentence_with_used_uuid_returns_409() {
 
     let mut json = HashMap::new();
     json.insert("id", sentence_uuid.to_string());
-    json.insert("text", sentence_text.to_string());
-    json.insert("iso639_3", sentence_iso639_3.to_string());
+    json.insert("text", "Une autre phrase.".to_string());
+    json.insert("iso639_3", "fra".to_string());
 
     let client = reqwest::Client::new();
-    let response = client.post("http://localhost:8000/sentences")
+
+    let url = format!(
+        "{}/sentences",
+        SERVICE_URL,
+    );
+    let response = client.post(&url)
         .json(&json)
         .send()
         .unwrap();
