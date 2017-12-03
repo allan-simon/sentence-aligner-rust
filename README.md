@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/allan-simon/sentence-aligner-rust?branch=master)](https://travis-ci.org/allan-simon/sentence-aligner-rust)
+[![Build Status](https://travis-ci.org/allan-simon/sentence-aligner-rust.svg?branch=master)](https://travis-ci.org/allan-simon/sentence-aligner-rust)
 
 # Sentence-aligner
 
