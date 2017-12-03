@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/allan-simon/sentence-aligner-rust?branch=master)](https://travis-ci.org/allan-simon/sentence-aligner-rust)
+
 # Sentence-aligner
 
 Sentence aligner api
