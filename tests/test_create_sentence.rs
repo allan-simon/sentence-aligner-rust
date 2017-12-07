@@ -1,13 +1,16 @@
 extern crate reqwest;
 extern crate uuid;
 
+#[macro_use] extern crate serde_derive;
+
 use std::collections::HashMap;
 
 use reqwest::StatusCode;
 
 mod db;
 
-const SERVICE_URL: &str = "http://localhost:8000/";
+#[path = "../utils/tests_commons.rs"]
+mod tests_commons;
 
 #[test]
 fn test_post_sentence_returns_200() {
@@ -23,7 +26,7 @@ fn test_post_sentence_returns_200() {
 
     let url = format!(
         "{}/sentences",
-        SERVICE_URL,
+        tests_commons::SERVICE_URL,
     );
     let response = client.post(&url)
         .json(&json)
@@ -61,7 +64,7 @@ fn test_post_sentence_with_used_uuid_returns_409() {
 
     let url = format!(
         "{}/sentences",
-        SERVICE_URL,
+        tests_commons::SERVICE_URL,
     );
     let response = client.post(&url)
         .json(&json)
