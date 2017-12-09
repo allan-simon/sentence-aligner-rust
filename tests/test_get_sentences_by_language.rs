@@ -7,17 +7,8 @@ use reqwest::StatusCode;
 
 mod db;
 
-type Sentences = Vec<Sentence>;
-
-#[derive(Deserialize)]
-pub struct Sentence {
-    pub id: Option<uuid::Uuid>,
-    pub text: String,
-    pub iso639_3: String,
-    pub structure: Option<String>,
-}
-
-const SERVICE_URL: &str = "http://localhost:8000";
+#[path = "../utils/tests_commons.rs"]
+mod tests_commons;
 
 #[test]
 fn test_get_sentence_by_language_returns_200() {
@@ -57,7 +48,7 @@ fn test_get_sentence_by_language_returns_200() {
 
     let url = format!(
         "{}/languages/{}/sentences",
-        SERVICE_URL,
+        tests_commons::SERVICE_URL,
         first_english_iso639_3.to_string(),
     );
     let mut response = reqwest::get(&url).unwrap();
@@ -67,7 +58,7 @@ fn test_get_sentence_by_language_returns_200() {
         StatusCode::Ok,
     );
 
-    let sentences = response.json::<Sentences>().unwrap();
+    let sentences = response.json::<tests_commons::Sentences>().unwrap();
 
     assert_eq!(
         sentences.len(),

@@ -7,15 +7,8 @@ use reqwest::StatusCode;
 
 mod db;
 
-#[derive(Deserialize)]
-pub struct Sentence {
-    pub id: Option<uuid::Uuid>,
-    pub text: String,
-    pub iso639_3: String,
-    pub structure: Option<String>,
-}
-
-const SERVICE_URL: &str = "http://localhost:8000";
+#[path = "../utils/tests_commons.rs"]
+mod tests_commons;
 
 #[test]
 fn test_get_sentence_if_exists_returns_200() {
@@ -35,7 +28,7 @@ fn test_get_sentence_if_exists_returns_200() {
 
     let url = format!(
         "{}/sentences/{}",
-        SERVICE_URL,
+        tests_commons::SERVICE_URL,
         sentence_uuid.to_string(),
     );
     let mut response = reqwest::get(&url).unwrap();
@@ -45,7 +38,7 @@ fn test_get_sentence_if_exists_returns_200() {
         StatusCode::Ok,
     );
 
-    let sentence = response.json::<Sentence>().unwrap();
+    let sentence = response.json::<tests_commons::Sentence>().unwrap();
 
     assert_eq!(
         sentence.text,
@@ -70,7 +63,7 @@ fn test_get_sentence_if_does_not_exist_returns_404() {
 
     let url = format!(
         "{}/sentences/{}",
-        SERVICE_URL,
+        tests_commons::SERVICE_URL,
         sentence_uuid.to_string(),
     );
     let response = reqwest::get(&url).unwrap();
