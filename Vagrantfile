@@ -33,6 +33,12 @@ Vagrant.configure(2) do |config|
       d.env = {
         "HOST_USER_UID" => Process.euid,
 
+        # only one thread allocated for tests
+        # as database is cleaned in every test;
+        # parallel tests execution might result in data deletion
+        # even if this data is used by another test
+        "RUST_TEST_THREADS" => "1",
+
         "DB_USER" => "vagrant",
         "DB_PASSWORD" => "vagrant",
         "DB_HOST" => "db",
