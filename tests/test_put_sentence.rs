@@ -56,7 +56,7 @@ fn test_put_sentence_text_returns_200() {
 }
 
 #[test]
-fn test_put_sentence_text_that_does_not_exist_returns_403() {
+fn test_put_sentence_text_that_does_not_exist_returns_404() {
 
     let connection = db::get_connection();
     db::clear(&connection);
@@ -121,5 +121,30 @@ fn test_put_sentence_language_returns_200() {
             &sentence_uuid,
         ),
         modified_language,
+    );
+}
+
+#[test]
+fn test_put_sentence_language_that_does_not_exist_returns_404() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/sentences/{}/language",
+        tests_commons::SERVICE_URL,
+        uuid::Uuid::new_v4(),
+    );
+    let response = client.put(&url)
+        .body("fra")
+        .header(ContentType::plaintext())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::NotFound,
     );
 }
