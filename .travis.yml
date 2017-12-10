@@ -11,6 +11,11 @@ env:
     - DB_USER=postgres
     # travis-ci default postgresql database has a blank password
     - DB_PASSWORD=
+    # only one thread allocated for tests
+    # as database is cleaned in every test;
+    # parallel tests execution might result in data deletion
+    # even if this data is used by another test
+    - RUST_TEST_THREADS=1
 
 os:
   - linux
