@@ -54,3 +54,28 @@ fn test_put_sentence_text_returns_200() {
         modified_sentence,
     );
 }
+
+#[test]
+fn test_put_sentence_text_that_does_not_exist_returns_403() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/sentences/{}/text",
+        tests_commons::SERVICE_URL,
+        uuid::Uuid::new_v4(),
+    );
+    let response = client.put(&url)
+        .body("This is a sentence.")
+        .header(ContentType::plaintext())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::NotFound,
+    );
+}
