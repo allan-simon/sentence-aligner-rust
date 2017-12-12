@@ -192,3 +192,28 @@ fn test_put_sentence_structure_returns_200() {
         modified_structure,
     );
 }
+
+#[test]
+fn test_put_sentence_structure_that_does_not_exist_returns_404() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/sentences/{}/structure",
+        tests_commons::SERVICE_URL,
+        uuid::Uuid::new_v4(),
+    );
+    let response = client.put(&url)
+        .body("<sentence>This is one sentence</sentence>")
+        .header(ContentType::plaintext())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::NotFound,
+    );
+}
