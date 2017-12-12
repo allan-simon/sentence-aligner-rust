@@ -110,7 +110,7 @@ fn edit_sentence_text<'r>(
         .finalize()
 }
 
-#[put("/sentences/<sentence_uuid>/structure", format="text/plain", data="<text>")]
+#[put("/sentences/<sentence_uuid>/structure", format="text/xml", data="<text>")]
 fn edit_sentence_structure<'r>(
     connection: db::DbConnection,
     sentence_uuid: UUID,

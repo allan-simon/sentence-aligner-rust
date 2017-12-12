@@ -175,7 +175,7 @@ fn test_put_sentence_structure_returns_200() {
     let modified_structure = "<sentence>This is one sentence</sentence>";
     let response = client.put(&url)
         .body(modified_structure)
-        .header(ContentType::plaintext())
+        .header(ContentType::xml())
         .send()
         .unwrap();
 
@@ -208,7 +208,7 @@ fn test_put_sentence_structure_that_does_not_exist_returns_404() {
     );
     let response = client.put(&url)
         .body("<sentence>This is one sentence</sentence>")
-        .header(ContentType::plaintext())
+        .header(ContentType::xml())
         .send()
         .unwrap();
 
