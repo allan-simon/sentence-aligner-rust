@@ -119,10 +119,12 @@ fn edit_sentence_structure<'r>(
 
     let real_uuid : Uuid = *sentence_uuid;
 
+    /* we add ::TEXT::XML because Postgresql query parameters need explicit cast:
+       https://github.com/sfackler/rust-postgres/issues/309#issuecomment-351063887 */
     let result = connection.execute(
         r#"
             UPDATE sentence
-            SET content = $1
+            SET structure = $1::TEXT::XML
             WHERE id = $2
         "#,
         &[

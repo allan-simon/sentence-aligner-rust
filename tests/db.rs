@@ -155,3 +155,38 @@ pub fn get_language(
 
     row.get(0)
 }
+
+/// Returns the structure text for a given sentence UUID
+///
+/// # Arguments:
+///
+/// `connection` - The PostgreSQL connection object
+/// `uuid` - The sentence UUID v4
+///
+/// NOTE: allow dead_code to prevent cargo test incorrect warnings
+/// (https://github.com/rust-lang/rust/issues/46379)
+#[allow(dead_code)]
+pub fn get_structure(
+    connection: &Connection,
+    uuid: &uuid::Uuid,
+) -> String {
+
+    let result = connection.query(
+        r#"
+            SELECT structure::TEXT
+            FROM sentence
+            WHERE id = $1
+        "#,
+        &[&uuid]
+    );
+
+    let rows = result.expect("problem while getting sentence");
+
+    let row = rows
+        .iter()
+        .next() // there's only 1 result
+        .expect("0 results, expected one...")
+    ;
+
+    row.get(0)
+}
