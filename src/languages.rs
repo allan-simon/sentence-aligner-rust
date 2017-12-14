@@ -25,18 +25,18 @@ fn create_language<'r>(
         &[&iso639_3],
     );
 
-    match result {
-        Ok(_) => {},
-        Err(ref e) => {
-            if e.code() == Some(&UNIQUE_VIOLATION) {
+    if result.is_err() {
 
-                return Response::build()
-                    .status(Status::Conflict)
-                    .finalize();
-            }
-            panic!(format!("{}", e));
+        let error = result.unwrap_err();
+
+        if error.code() == Some(&UNIQUE_VIOLATION) {
+            return Response::build()
+                .status(Status::Conflict)
+                .finalize();
         }
-    };
+
+        panic!(format!("{}", error));
+    }
 
     Response::build()
         .status(Status::Created)
