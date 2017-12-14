@@ -45,6 +45,7 @@ pub fn get_connection() -> Connection {
 pub fn clear(connection: &Connection) {
 
     connection.execute("TRUNCATE TABLE sentence;", &[]).unwrap();
+    connection.execute("TRUNCATE TABLE language;", &[]).unwrap();
 }
 
 /// Inserts one sentence into the table 'sentence'
@@ -83,6 +84,30 @@ pub fn insert_sentence(
             &content,
             &iso639_3,
         ]
+    );
+}
+
+/// Inserts one language into the table 'language'
+///
+/// # Arguments:
+///
+/// `connection` - The PostgreSQL connection object
+/// `iso639_3` - The language
+///
+/// NOTE: allow dead_code to prevent cargo test incorrect warnings
+/// (https://github.com/rust-lang/rust/issues/46379)
+#[allow(dead_code)]
+pub fn insert_language(
+    connection: &Connection,
+    iso639_3: &str,
+) {
+
+    let _ = connection.execute(
+        r#"
+        INSERT INTO language(iso639_3)
+        VALUES ($1)
+        "#,
+        &[&iso639_3]
     );
 }
 
@@ -189,4 +214,32 @@ pub fn get_structure(
     ;
 
     row.get(0)
+}
+
+/// Indicates if a language exists in database (iso639_3)
+///
+/// # Arguments:
+///
+/// `connection` - The PostgreSQL connection object
+/// `iso639_3` - The language
+///
+/// NOTE: allow dead_code to prevent cargo test incorrect warnings
+/// (https://github.com/rust-lang/rust/issues/46379)
+#[allow(dead_code)]
+pub fn language_exists(
+    connection: &Connection,
+    iso639_3: &str,
+) -> bool {
+
+    let rows = connection.query(
+        r#"
+            SELECT 1
+            FROM language
+            WHERE iso639_3 = $1
+        "#,
+        &[&iso639_3]
+    )
+    .expect("problem while getting language");
+
+    rows.len() == 1
 }

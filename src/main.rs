@@ -23,6 +23,23 @@ fn main() {
     let pool = db::init_pool();
     let connection = pool.get().unwrap();
     connection.execute("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"", &[]).unwrap();
+
+    connection.execute(
+        r#"
+        CREATE TABLE IF NOT EXISTS language (
+            id SERIAL PRIMARY KEY,
+            iso639_3 VARCHAR(3) UNIQUE NOT NULL
+            CONSTRAINT iso639_3_length CHECK (CHAR_LENGTH(iso639_3) = 3)
+        )
+        "#,
+        &[],
+    )
+    .expect("can't create table language");
+
+    /* TODO: create a relationship between the language and sentence tables,
+       the language table should be used to store the language
+       instead of the sentence table
+       (language INTEGER REFERENCES language (id) NOT NULL) */
     connection.execute(
         r#"
         CREATE TABLE IF NOT EXISTS sentence (
@@ -51,6 +68,7 @@ fn main() {
                 one_sentence::edit_sentence_text,
                 one_sentence::edit_sentence_structure,
                 one_sentence::edit_sentence_language,
+                languages::create_language,
                 languages::get_all_sentences_of_language,
             ]
         )
