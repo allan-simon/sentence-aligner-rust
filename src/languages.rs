@@ -4,16 +4,39 @@ use rocket::Response;
 use rocket::http::ContentType;
 use rocket::http::Status;
 
+use postgres::error::UNIQUE_VIOLATION;
+
 use std::io::Cursor;
 
 use db;
 use sentences::Sentence;
 
-#[post("/languages", format="text/plain", data="<language>")]
+#[post("/languages", format="text/plain", data="<iso639_3>")]
 fn create_language<'r>(
     connection: db::DbConnection,
-    language: String,
+    iso639_3: String,
 ) -> Response<'r> {
+
+    let result = connection.query(
+        r#"
+            INSERT INTO language(iso639_3)
+            VALUES ($1)
+        "#,
+        &[&iso639_3],
+    );
+
+    match result {
+        Ok(_) => {},
+        Err(ref e) => {
+            if e.code() == Some(&UNIQUE_VIOLATION) {
+
+                return Response::build()
+                    .status(Status::Conflict)
+                    .finalize();
+            }
+            panic!(format!("{}", e));
+        }
+    };
 
     return Response::build()
         .status(Status::Created)
