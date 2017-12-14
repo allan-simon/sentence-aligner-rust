@@ -29,6 +29,7 @@ fn main() {
         CREATE TABLE IF NOT EXISTS language (
             id SERIAL PRIMARY KEY,
             iso639_3 VARCHAR(3) UNIQUE NOT NULL
+            CONSTRAINT iso639_3_length CHECK (CHAR_LENGTH(iso639_3) = 3)
         )
         "#,
         &[],

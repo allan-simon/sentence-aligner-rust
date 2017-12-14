@@ -73,3 +73,27 @@ fn test_post_language_that_already_exists_returns_409() {
         StatusCode::Conflict,
     );
 }
+
+#[test]
+fn test_post_language_with_incorrect_iso639_3_length() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/languages",
+        tests_commons::SERVICE_URL,
+    );
+    let response = client.post(&url)
+        .body("fr") // two characters given, three expected
+        .header(ContentType::plaintext())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::InternalServerError,
+    );
+}
