@@ -35,8 +35,10 @@ fn main() {
     )
     .expect("can't create table language");
 
-    /* TODO: create a relationship between the language and sentence tables:
-       language INTEGER REFERENCES language (id) NOT NULL */
+    /* TODO: create a relationship between the language and sentence tables,
+       the language table should be used to store the language
+       instead of the sentence table
+       (language INTEGER REFERENCES language (id) NOT NULL) */
     connection.execute(
         r#"
         CREATE TABLE IF NOT EXISTS sentence (

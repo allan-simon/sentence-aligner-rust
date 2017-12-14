@@ -3,8 +3,6 @@ extern crate uuid;
 
 #[macro_use] extern crate serde_derive;
 
-use std::collections::HashMap;
-
 use reqwest::StatusCode;
 use reqwest::header::ContentType;
 

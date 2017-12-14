@@ -19,8 +19,8 @@ fn create_language<'r>(
 
     let result = connection.query(
         r#"
-            INSERT INTO language(iso639_3)
-            VALUES ($1)
+        INSERT INTO language(iso639_3)
+        VALUES ($1)
         "#,
         &[&iso639_3],
     );
@@ -38,9 +38,9 @@ fn create_language<'r>(
         }
     };
 
-    return Response::build()
+    Response::build()
         .status(Status::Created)
-        .finalize();
+        .finalize()
 }
 
 #[get("/languages/<language_code>/sentences")]

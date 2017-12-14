@@ -93,6 +93,10 @@ pub fn insert_sentence(
 ///
 /// `connection` - The PostgreSQL connection object
 /// `iso639_3` - The language
+///
+/// NOTE: allow dead_code to prevent cargo test incorrect warnings
+/// (https://github.com/rust-lang/rust/issues/46379)
+#[allow(dead_code)]
 pub fn insert_language(
     connection: &Connection,
     iso639_3: &str,
@@ -218,21 +222,24 @@ pub fn get_structure(
 ///
 /// `connection` - The PostgreSQL connection object
 /// `iso639_3` - The language
+///
+/// NOTE: allow dead_code to prevent cargo test incorrect warnings
+/// (https://github.com/rust-lang/rust/issues/46379)
+#[allow(dead_code)]
 pub fn language_exists(
     connection: &Connection,
     iso639_3: &str,
 ) -> bool {
 
-    let result = connection.query(
+    let rows = connection.query(
         r#"
             SELECT 1
             FROM language
             WHERE iso639_3 = $1
         "#,
         &[&iso639_3]
-    );
-
-    let rows = result.expect("problem while getting language");
+    )
+    .expect("problem while getting language");
 
     rows.len() == 1
 }
