@@ -2,11 +2,23 @@ extern crate uuid;
 
 use rocket::Response;
 use rocket::http::ContentType;
+use rocket::http::Status;
 
 use std::io::Cursor;
 
 use db;
 use sentences::Sentence;
+
+#[post("/languages", format="text/plain", data="<language>")]
+fn create_language<'r>(
+    connection: db::DbConnection,
+    language: String,
+) -> Response<'r> {
+
+    return Response::build()
+        .status(Status::Created)
+        .finalize();
+}
 
 #[get("/languages/<language_code>/sentences")]
 fn get_all_sentences_of_language<'r>(

@@ -35,15 +35,17 @@ fn main() {
     )
     .expect("can't create table language");
 
+    /* TODO: create a relationship between the language and sentence tables:
+       language INTEGER REFERENCES language (id) NOT NULL */
     connection.execute(
         r#"
         CREATE TABLE IF NOT EXISTS sentence (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             content TEXT NOT NULL,
-            language INTEGER REFERENCES language (id) NOT NULL,
+            iso639_3 VARCHAR(3) NOT NULL,
             structure XML DEFAULT NULL,
-            UNIQUE(content)
+            UNIQUE(content, iso639_3)
         )
         "#,
         &[],
@@ -63,6 +65,7 @@ fn main() {
                 one_sentence::edit_sentence_text,
                 one_sentence::edit_sentence_structure,
                 one_sentence::edit_sentence_language,
+                languages::create_language,
                 languages::get_all_sentences_of_language,
             ]
         )
