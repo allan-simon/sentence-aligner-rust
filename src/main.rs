@@ -23,15 +23,27 @@ fn main() {
     let pool = db::init_pool();
     let connection = pool.get().unwrap();
     connection.execute("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"", &[]).unwrap();
+
+    connection.execute(
+        r#"
+        CREATE TABLE IF NOT EXISTS language (
+            id SERIAL PRIMARY KEY,
+            iso639_3 VARCHAR(3) UNIQUE NOT NULL
+        )
+        "#,
+        &[],
+    )
+    .expect("can't create table language");
+
     connection.execute(
         r#"
         CREATE TABLE IF NOT EXISTS sentence (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             content TEXT NOT NULL,
-            iso639_3 VARCHAR(3) NOT NULL,
+            language INTEGER REFERENCES language (id) NOT NULL,
             structure XML DEFAULT NULL,
-            UNIQUE(content, iso639_3)
+            UNIQUE(content)
         )
         "#,
         &[],
