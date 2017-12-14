@@ -190,3 +190,28 @@ pub fn get_structure(
 
     row.get(0)
 }
+
+/// Indicates if a language exists in database (iso639_3)
+///
+/// # Arguments:
+///
+/// `connection` - The PostgreSQL connection object
+/// `iso639_3` - The language
+pub fn language_exists(
+    connection: &Connection,
+    iso639_3: &str,
+) -> bool {
+
+    let result = connection.query(
+        r#"
+            SELECT 1
+            FROM language
+            WHERE iso639_3 = $1
+        "#,
+        &[&iso639_3]
+    );
+
+    let rows = result.expect("problem while getting language");
+
+    rows.len() == 1
+}
