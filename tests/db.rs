@@ -87,6 +87,26 @@ pub fn insert_sentence(
     );
 }
 
+/// Inserts one language into the table 'language'
+///
+/// # Arguments:
+///
+/// `connection` - The PostgreSQL connection object
+/// `iso639_3` - The language
+pub fn insert_language(
+    connection: &Connection,
+    iso639_3: &str,
+) {
+
+    let _ = connection.execute(
+        r#"
+        INSERT INTO language(iso639_3)
+        VALUES ($1)
+        "#,
+        &[&iso639_3]
+    );
+}
+
 /// Returns the sentence text for a given sentence UUID
 ///
 /// # Arguments:

@@ -45,3 +45,33 @@ fn test_post_language_returns_200() {
         "The language has not been inserted."
     );
 }
+
+#[test]
+fn test_post_language_that_already_exists_returns_409() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let created_language = "eng";
+    db::insert_language(
+        &connection,
+        &created_language,
+    );
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/languages",
+        tests_commons::SERVICE_URL,
+    );
+    let response = client.post(&url)
+        .body(created_language)
+        .header(ContentType::plaintext())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::Conflict,
+    );
+}
