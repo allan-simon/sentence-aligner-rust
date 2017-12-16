@@ -36,23 +36,17 @@ fn main() {
     )
     .expect("can't create table language");
 
-    /* TODO: create a relationship between the language and sentence tables,
-       the language table should be used to store the language
-       instead of the sentence table
-       (language INTEGER REFERENCES language (id) NOT NULL) */
     connection.execute(
         r#"
         CREATE TABLE IF NOT EXISTS sentence (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            iso639_3 INTEGER REFERENCES language (id) ON DELETE SET NULL,
             added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            content TEXT NOT NULL,
-            iso639_3 VARCHAR(3) NOT NULL,
-            structure XML DEFAULT NULL,
-            UNIQUE(content, iso639_3)
+            content TEXT NOT NULL UNIQUE,
+            structure XML DEFAULT NULL
         )
         "#,
         &[],
-
     )
     .expect("can't create table sentence");
 
