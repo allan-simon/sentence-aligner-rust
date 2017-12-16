@@ -45,7 +45,7 @@ pub fn get_connection() -> Connection {
 pub fn clear(connection: &Connection) {
 
     connection.execute("TRUNCATE TABLE sentence;", &[]).unwrap();
-    connection.execute("TRUNCATE TABLE language;", &[]).unwrap();
+    connection.execute("TRUNCATE TABLE language CASCADE;", &[]).unwrap();
 }
 
 /// Inserts one sentence into the table 'sentence'
