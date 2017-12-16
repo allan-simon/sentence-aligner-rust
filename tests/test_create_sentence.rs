@@ -45,9 +45,14 @@ fn test_post_sentence_with_used_uuid_returns_409() {
     let connection = db::get_connection();
     db::clear(&connection);
 
+    let sentence_iso639_3 = "fra";
+    db::insert_language(
+        &connection,
+        &sentence_iso639_3,
+    );
+
     let sentence_uuid = uuid::Uuid::new_v4();
     let sentence_text = "This is one sentence.";
-    let sentence_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
         &sentence_uuid,
@@ -58,7 +63,7 @@ fn test_post_sentence_with_used_uuid_returns_409() {
     let mut json = HashMap::new();
     json.insert("id", sentence_uuid.to_string());
     json.insert("text", "Une autre phrase.".to_string());
-    json.insert("iso639_3", "fra".to_string());
+    json.insert("iso639_3", sentence_iso639_3.to_string());
 
     let client = reqwest::Client::new();
 

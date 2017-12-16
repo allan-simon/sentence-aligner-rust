@@ -16,9 +16,20 @@ fn test_get_all_sentences_returns_200() {
     let connection = db::get_connection();
     db::clear(&connection);
 
+    let first_english_iso639_3 = "eng";
+    db::insert_language(
+        &connection,
+        &first_english_iso639_3,
+    );
+
+    let second_english_iso639_3 = "fra";
+    db::insert_language(
+        &connection,
+        &second_english_iso639_3,
+    );
+
     let first_english_uuid = uuid::Uuid::new_v4();
     let first_english_text = "This is one sentence";
-    let first_english_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
         &first_english_uuid,
@@ -28,7 +39,6 @@ fn test_get_all_sentences_returns_200() {
 
     let second_english_uuid = uuid::Uuid::new_v4();
     let second_english_text = "This is a second sentence";
-    let second_english_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
         &second_english_uuid,
