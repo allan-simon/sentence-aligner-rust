@@ -28,11 +28,11 @@ fn create_sentence<'r>(
         INSERT INTO sentence(
             id,
             content,
-            iso639_3
+            language_id
         ) VALUES (
             $1,
             $2,
-            $3
+            (SELECT language_id FROM language WHERE iso639_3 = $3)
         )
         RETURNING id
         "#,
@@ -81,9 +81,10 @@ fn get_all_sentences<'r>(
             SELECT
                 id,
                 content,
-                iso639_3,
+                language.iso639_3,
                 structure::text
             FROM sentence
+            JOIN language USING (language_id)
             ORDER BY
                 added_at,
                 id
