@@ -45,7 +45,7 @@ pub fn get_connection() -> Connection {
 pub fn clear(connection: &Connection) {
 
     connection.execute("TRUNCATE TABLE sentence;", &[]).unwrap();
-    connection.execute("TRUNCATE TABLE language;", &[]).unwrap();
+    connection.execute("TRUNCATE TABLE language CASCADE;", &[]).unwrap();
 }
 
 /// Inserts one sentence into the table 'sentence'
@@ -72,11 +72,11 @@ pub fn insert_sentence(
         INSERT INTO sentence(
             id,
             content,
-            iso639_3
+            language_id
         ) VALUES (
             $1,
             $2,
-            $3
+            (SELECT id FROM language WHERE iso639_3 = $3)
         )
         "#,
         &[
@@ -156,16 +156,17 @@ pub fn get_sentence(
 /// NOTE: allow dead_code to prevent cargo test incorrect warnings
 /// (https://github.com/rust-lang/rust/issues/46379)
 #[allow(dead_code)]
-pub fn get_language(
+pub fn get_language_by_sentence(
     connection: &Connection,
     uuid: &uuid::Uuid,
 ) -> String {
 
     let result = connection.query(
         r#"
-            SELECT iso639_3
+            SELECT language.iso639_3
             FROM sentence
-            WHERE id = $1
+            JOIN language ON (sentence.language_id = language.id)
+            WHERE sentence.id = $1
         "#,
         &[&uuid]
     );

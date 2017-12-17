@@ -28,11 +28,11 @@ fn create_sentence<'r>(
         INSERT INTO sentence(
             id,
             content,
-            iso639_3
+            language_id
         ) VALUES (
             $1,
             $2,
-            $3
+            (SELECT id FROM language WHERE iso639_3 = $3)
         )
         RETURNING id
         "#,
@@ -79,14 +79,15 @@ fn get_all_sentences<'r>(
     let result = connection.query(
         r#"
             SELECT
-                id,
+                sentence.id,
                 content,
-                iso639_3,
+                language.iso639_3,
                 structure::text
             FROM sentence
+            JOIN language ON (sentence.language_id = language.id)
             ORDER BY
                 added_at,
-                id
+                sentence.id
             LIMIT 100
         "#,
         &[],

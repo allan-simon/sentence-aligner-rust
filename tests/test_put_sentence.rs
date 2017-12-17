@@ -86,9 +86,20 @@ fn test_put_sentence_language_returns_200() {
     let connection = db::get_connection();
     db::clear(&connection);
 
+    let sentence_iso639_3 = "eng";
+    db::insert_language(
+        &connection,
+        &sentence_iso639_3,
+    );
+
+    let modified_language = "fra";
+    db::insert_language(
+        &connection,
+        &modified_language,
+    );
+
     let sentence_uuid = uuid::Uuid::new_v4();
     let sentence_text = "This is one sentence";
-    let sentence_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
         &sentence_uuid,
@@ -103,7 +114,6 @@ fn test_put_sentence_language_returns_200() {
         tests_commons::SERVICE_URL,
         sentence_uuid,
     );
-    let modified_language = "fra";
     let response = client.put(&url)
         .body(modified_language)
         .header(ContentType::plaintext())
@@ -116,7 +126,7 @@ fn test_put_sentence_language_returns_200() {
     );
 
     assert_eq!(
-        db::get_language(
+        db::get_language_by_sentence(
             &connection,
             &sentence_uuid,
         ),

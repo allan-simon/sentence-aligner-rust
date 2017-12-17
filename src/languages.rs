@@ -52,15 +52,16 @@ fn get_all_sentences_of_language<'r>(
     let result = connection.query(
         r#"
             SELECT
-                id,
-                content,
+                sentence.id,
+                sentence.content,
                 iso639_3,
-                structure::text
-            FROM sentence
+                sentence.structure::text
+            FROM language
+            JOIN sentence ON (sentence.language_id = language.id)
             WHERE iso639_3 = $1
             ORDER BY
-                added_at,
-                id
+                sentence.added_at,
+                sentence.id
             LIMIT 100
         "#,
         &[&language_code],
