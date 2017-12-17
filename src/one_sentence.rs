@@ -171,12 +171,9 @@ fn edit_sentence_language<'r>(
     let result = connection.execute(
         r#"
             UPDATE sentence
-            SET language_id = (
-                SELECT language_id
-                FROM language
-                WHERE iso639_3 = $1
-            )
-            WHERE id = $2
+            SET language_id = language.language_id
+            FROM language
+            WHERE language.iso639_3 = $1 AND id = $2
         "#,
         &[
             &text,
