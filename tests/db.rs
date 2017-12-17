@@ -76,7 +76,7 @@ pub fn insert_sentence(
         ) VALUES (
             $1,
             $2,
-            (SELECT language_id FROM language WHERE iso639_3 = $3)
+            (SELECT id FROM language WHERE iso639_3 = $3)
         )
         "#,
         &[
@@ -165,8 +165,8 @@ pub fn get_language_by_sentence(
         r#"
             SELECT language.iso639_3
             FROM sentence
-            JOIN language USING (language_id)
-            WHERE id = $1
+            JOIN language ON (sentence.language_id = language.id)
+            WHERE sentence.id = $1
         "#,
         &[&uuid]
     );

@@ -25,13 +25,13 @@ fn get_sentence<'r>(
     let result = connection.query(
         r#"
             SELECT
-                id,
+                sentence.id,
                 content,
                 language.iso639_3,
                 structure::text
             FROM sentence
-            JOIN language USING (language_id)
-            WHERE id = $1
+            JOIN language ON (sentence.language_id = language.id)
+            WHERE sentence.id = $1
         "#,
         &[&real_uuid]
     );
@@ -171,9 +171,9 @@ fn edit_sentence_language<'r>(
     let result = connection.execute(
         r#"
             UPDATE sentence
-            SET language_id = language.language_id
+            SET language_id = language.id
             FROM language
-            WHERE language.iso639_3 = $1 AND id = $2
+            WHERE language.iso639_3 = $1 AND sentence.id = $2
         "#,
         &[
             &text,

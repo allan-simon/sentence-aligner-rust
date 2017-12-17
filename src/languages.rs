@@ -57,7 +57,7 @@ fn get_all_sentences_of_language<'r>(
                 iso639_3,
                 sentence.structure::text
             FROM language
-            JOIN sentence USING (language_id)
+            JOIN sentence ON (sentence.language_id = language.id)
             WHERE iso639_3 = $1
             ORDER BY
                 sentence.added_at,

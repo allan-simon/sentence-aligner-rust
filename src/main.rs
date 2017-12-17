@@ -27,7 +27,7 @@ fn main() {
     connection.execute(
         r#"
         CREATE TABLE IF NOT EXISTS language (
-            language_id SERIAL PRIMARY KEY,
+            id SERIAL PRIMARY KEY,
             iso639_3 VARCHAR(3) UNIQUE NOT NULL
             CONSTRAINT iso639_3_length CHECK (CHAR_LENGTH(iso639_3) = 3)
         )
@@ -40,7 +40,7 @@ fn main() {
         r#"
         CREATE TABLE IF NOT EXISTS sentence (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            language_id INTEGER REFERENCES language (language_id) ON DELETE SET NULL,
+            language_id INTEGER REFERENCES language (id) ON DELETE SET NULL,
             added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             content TEXT NOT NULL UNIQUE,
             structure XML DEFAULT NULL
