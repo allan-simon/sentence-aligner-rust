@@ -120,6 +120,28 @@ fn edit_sentence_structure<'r>(
 
     let real_uuid : Uuid = *sentence_uuid;
 
+    let result = connection.execute(
+        r#"
+            SELECT content
+            FROM sentence
+            WHERE id = $1
+        "#,
+        &[&real_uuid],
+    );
+
+    let not_found = match result {
+        Ok(rows) => rows == 0,
+        Err(ref e) => {
+            panic!(format!("{}", e));
+        }
+    };
+
+    if not_found {
+        return Response::build()
+            .status(Status::NotFound)
+            .finalize();
+    }
+
     /* we add ::TEXT::XML because Postgresql query parameters need explicit cast:
        https://github.com/sfackler/rust-postgres/issues/309#issuecomment-351063887 */
     let result = connection.execute(
@@ -134,24 +156,14 @@ fn edit_sentence_structure<'r>(
         ],
     );
 
-    let not_found = match result {
-        Ok(nbr_row_updated) => nbr_row_updated == 0,
-        Err(ref e) => {
-            if e.code() == Some(&UNIQUE_VIOLATION) {
-                return  Response::build()
-                    .status(Status::Conflict)
-                    .finalize()
-                ;
-            }
-            panic!(format!("{}", e));
+    if result.is_err() {
+        let error = result.unwrap_err();
+        if error.code() == Some(&UNIQUE_VIOLATION) {
+            return Response::build()
+                .status(Status::Conflict)
+                .finalize();
         }
-    };
-
-    if not_found {
-        return  Response::build()
-            .status(Status::NotFound)
-            .finalize()
-        ;
+        panic!(format!("{}", error));
     }
 
     Response::build()
