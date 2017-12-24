@@ -252,7 +252,7 @@ fn test_put_sentence_structure_that_does_not_match_content_returns_400() {
         &sentence_uuid,
     );
     let response = client.put(&url)
-        .body("<sentence>Contains different words.</sentence>")
+        .body("<subject>I</subject><verb>eat</verb><complement>apple</complement>")
         .header(ContentType::xml())
         .send()
         .unwrap();
