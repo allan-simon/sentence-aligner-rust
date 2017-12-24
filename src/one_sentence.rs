@@ -120,7 +120,7 @@ fn edit_sentence_structure<'r>(
 
     let real_uuid : Uuid = *sentence_uuid;
 
-    let result = connection.execute(
+    let result = connection.query(
         r#"
             SELECT content
             FROM sentence
@@ -129,18 +129,23 @@ fn edit_sentence_structure<'r>(
         &[&real_uuid],
     );
 
-    let not_found = match result {
-        Ok(rows) => rows == 0,
+    let rows = match result {
+        Ok(rows) => rows,
         Err(ref e) => {
             panic!(format!("{}", e));
         }
     };
 
-    if not_found {
+    if rows.len() != 1 {
         return Response::build()
             .status(Status::NotFound)
             .finalize();
     }
+
+    let row: String = rows.get(0).get("content");
+    let allowed_words = row.split(" ");
+
+    /* XXX: decode the XML here */
 
     /* we add ::TEXT::XML because Postgresql query parameters need explicit cast:
        https://github.com/sfackler/rust-postgres/issues/309#issuecomment-351063887 */
