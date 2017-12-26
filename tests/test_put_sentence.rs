@@ -18,7 +18,7 @@ fn test_put_sentence_text_returns_200() {
     db::clear(&connection);
 
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
+    let sentence_text = "This is one sentence.";
     let sentence_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
@@ -99,7 +99,7 @@ fn test_put_sentence_language_returns_200() {
     );
 
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
+    let sentence_text = "This is one sentence.";
     db::insert_sentence(
         &connection,
         &sentence_uuid,
@@ -166,7 +166,7 @@ fn test_put_sentence_structure_returns_200() {
     db::clear(&connection);
 
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
+    let sentence_text = "This is one sentence.";
     let sentence_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
@@ -240,7 +240,7 @@ fn test_put_sentence_structure_that_does_not_match_content_returns_400() {
     db::clear(&connection);
 
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
+    let sentence_text = "This is one sentence.";
     let sentence_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
