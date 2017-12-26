@@ -182,7 +182,12 @@ fn test_put_sentence_structure_returns_200() {
         tests_commons::SERVICE_URL,
         sentence_uuid,
     );
-    let modified_structure = "<sentence>This is one sentence</sentence>";
+    let modified_structure = r#"
+        <subject>This</subject>
+        <verb>is</verb>
+        <complement>one</complement>
+        <complement>sentence</complement>
+    "#;
     let response = client.put(&url)
         .body(modified_structure)
         .header(ContentType::xml())

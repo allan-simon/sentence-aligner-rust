@@ -1,10 +1,13 @@
 extern crate uuid;
+extern crate xml;
 
 use rocket::Response;
 use rocket::http::Status;
 use rocket::http::ContentType;
 use rocket_contrib::UUID;
 use postgres::error::UNIQUE_VIOLATION;
+use self::xml::reader::EventReader;
+use self::xml::reader::XmlEvent::Characters;
 
 use self::uuid::Uuid;
 use std::io::Cursor;
@@ -143,9 +146,27 @@ fn edit_sentence_structure<'r>(
     }
 
     let row: String = rows.get(0).get("content");
-    let allowed_words = row.split(" ");
 
-    /* XXX: decode the XML here */
+    /* remove all spaces for easier comparison after parser iteration */
+    let allowed_structure = str::replace(&row, " ", "");
+
+    let parser = EventReader::from_str(&text);
+    let mut structure_sentence = String::new();
+
+    for word in parser {
+        match word {
+            Ok(Characters(name)) => {
+                structure_sentence += &name;
+            },
+            _ => {}
+        }
+    }
+
+    if allowed_structure != structure_sentence {
+        return Response::build()
+            .status(Status::BadRequest)
+            .finalize();
+    }
 
     /* we add ::TEXT::XML because Postgresql query parameters need explicit cast:
        https://github.com/sfackler/rust-postgres/issues/309#issuecomment-351063887 */
