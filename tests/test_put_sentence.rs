@@ -12,7 +12,7 @@ mod db;
 mod tests_commons;
 
 #[test]
-fn test_put_sentence_text_returns_200() {
+fn test_put_sentence_text_returns_204() {
 
     let connection = db::get_connection();
     db::clear(&connection);
@@ -81,7 +81,7 @@ fn test_put_sentence_text_that_does_not_exist_returns_404() {
 }
 
 #[test]
-fn test_put_sentence_language_returns_200() {
+fn test_put_sentence_language_returns_204() {
 
     let connection = db::get_connection();
     db::clear(&connection);
@@ -160,7 +160,7 @@ fn test_put_sentence_language_that_does_not_exist_returns_404() {
 }
 
 #[test]
-fn test_put_sentence_structure_returns_200() {
+fn test_put_sentence_structure_returns_204() {
 
     let connection = db::get_connection();
     db::clear(&connection);
