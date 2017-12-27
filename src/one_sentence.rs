@@ -1,10 +1,13 @@
 extern crate uuid;
+extern crate xml;
 
 use rocket::Response;
 use rocket::http::Status;
 use rocket::http::ContentType;
 use rocket_contrib::UUID;
 use postgres::error::UNIQUE_VIOLATION;
+use self::xml::reader::EventReader;
+use self::xml::reader::XmlEvent::{Characters, Whitespace};
 
 use self::uuid::Uuid;
 use std::io::Cursor;
@@ -120,6 +123,47 @@ fn edit_sentence_structure<'r>(
 
     let real_uuid : Uuid = *sentence_uuid;
 
+    let result = connection.query(
+        r#"
+            SELECT content
+            FROM sentence
+            WHERE id = $1
+        "#,
+        &[&real_uuid],
+    );
+
+    let rows = match result {
+        Ok(rows) => rows,
+        Err(ref e) => {
+            panic!(format!("{}", e));
+        }
+    };
+
+    if rows.len() != 1 {
+        return Response::build()
+            .status(Status::NotFound)
+            .finalize();
+    }
+
+    let content: String = rows.get(0).get("content");
+    let parser = EventReader::from_str(&text);
+    let mut structure = String::new();
+
+    for word in parser {
+        match word {
+            Ok(Characters(value)) | Ok(Whitespace(value)) => {
+                structure += &value;
+            },
+            _ => {}
+        }
+    }
+
+    if content != structure {
+        return Response::build()
+            .status(Status::BadRequest)
+            .finalize();
+    }
+
     /* we add ::TEXT::XML because Postgresql query parameters need explicit cast:
        https://github.com/sfackler/rust-postgres/issues/309#issuecomment-351063887 */
     let result = connection.execute(
@@ -134,24 +178,14 @@ fn edit_sentence_structure<'r>(
         ],
     );
 
-    let not_found = match result {
-        Ok(nbr_row_updated) => nbr_row_updated == 0,
-        Err(ref e) => {
-            if e.code() == Some(&UNIQUE_VIOLATION) {
-                return  Response::build()
-                    .status(Status::Conflict)
-                    .finalize()
-                ;
-            }
-            panic!(format!("{}", e));
+    if result.is_err() {
+        let error = result.unwrap_err();
+        if error.code() == Some(&UNIQUE_VIOLATION) {
+            return Response::build()
+                .status(Status::Conflict)
+                .finalize();
         }
-    };
-
-    if not_found {
-        return  Response::build()
-            .status(Status::NotFound)
-            .finalize()
-        ;
+        panic!(format!("{}", error));
     }
 
     Response::build()

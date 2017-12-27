@@ -12,13 +12,13 @@ mod db;
 mod tests_commons;
 
 #[test]
-fn test_put_sentence_text_returns_200() {
+fn test_put_sentence_text_returns_204() {
 
     let connection = db::get_connection();
     db::clear(&connection);
 
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
+    let sentence_text = "This is one sentence.";
     let sentence_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
@@ -81,7 +81,7 @@ fn test_put_sentence_text_that_does_not_exist_returns_404() {
 }
 
 #[test]
-fn test_put_sentence_language_returns_200() {
+fn test_put_sentence_language_returns_204() {
 
     let connection = db::get_connection();
     db::clear(&connection);
@@ -99,7 +99,7 @@ fn test_put_sentence_language_returns_200() {
     );
 
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
+    let sentence_text = "This is one sentence.";
     db::insert_sentence(
         &connection,
         &sentence_uuid,
@@ -160,13 +160,13 @@ fn test_put_sentence_language_that_does_not_exist_returns_404() {
 }
 
 #[test]
-fn test_put_sentence_structure_returns_200() {
+fn test_put_sentence_structure_returns_204() {
 
     let connection = db::get_connection();
     db::clear(&connection);
 
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
+    let sentence_text = "This is one sentence.";
     let sentence_iso639_3 = "eng";
     db::insert_sentence(
         &connection,
@@ -182,7 +182,7 @@ fn test_put_sentence_structure_returns_200() {
         tests_commons::SERVICE_URL,
         sentence_uuid,
     );
-    let modified_structure = "<sentence>This is one sentence</sentence>";
+    let modified_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>one</complement> <complement>sentence.</complement></sentence>";
     let response = client.put(&url)
         .body(modified_structure)
         .header(ContentType::xml())
@@ -217,7 +217,7 @@ fn test_put_sentence_structure_that_does_not_exist_returns_404() {
         uuid::Uuid::new_v4(),
     );
     let response = client.put(&url)
-        .body("<sentence>This is one sentence</sentence>")
+        .body("<sentence><subject>This</subject> <verb>is</verb> <complement>one</complement> <complement>sentence</complement></sentence>")
         .header(ContentType::xml())
         .send()
         .unwrap();
@@ -225,5 +225,84 @@ fn test_put_sentence_structure_that_does_not_exist_returns_404() {
     assert_eq!(
         response.status(),
         StatusCode::NotFound,
+    );
+}
+
+#[test]
+fn test_put_sentence_structure_that_does_not_match_content_returns_400() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let sentence_uuid = uuid::Uuid::new_v4();
+    let sentence_text = "This is one sentence.";
+    let sentence_iso639_3 = "eng";
+    db::insert_sentence(
+        &connection,
+        &sentence_uuid,
+        &sentence_text,
+        &sentence_iso639_3,
+    );
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/sentences/{}/structure",
+        tests_commons::SERVICE_URL,
+        &sentence_uuid,
+    );
+    let response = client.put(&url)
+        .body("<sentence><subject>I</subject> <verb>eat</verb> <complement>apple</complement></sentence>")
+        .header(ContentType::xml())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::BadRequest,
+    );
+}
+
+#[test]
+fn test_put_sentence_structure_with_untagged_words_returns_204() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let sentence_uuid = uuid::Uuid::new_v4();
+    let sentence_text = "This is one sentence.";
+    let sentence_iso639_3 = "eng";
+    db::insert_sentence(
+        &connection,
+        &sentence_uuid,
+        &sentence_text,
+        &sentence_iso639_3,
+    );
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/sentences/{}/structure",
+        tests_commons::SERVICE_URL,
+        &sentence_uuid,
+    );
+    let modified_structure = "<sentence><subject>This</subject> <verb>is</verb> one sentence.</sentence>";
+    let response = client.put(&url)
+        .body(modified_structure)
+        .header(ContentType::xml())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::NoContent,
+    );
+
+    assert_eq!(
+        db::get_structure(
+            &connection,
+            &sentence_uuid,
+        ),
+        modified_structure,
     );
 }
