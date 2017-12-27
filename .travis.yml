@@ -29,7 +29,7 @@ services:
 before_script:
   - createdb -h $DB_HOST -U $DB_USER -w $DB_NAME
 script:
-  - docker run --user=$UID --env HOME=/tmp --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder bash -c 'rustup default nightly-2017-12-20; rustup uninstall nightly; rustup target add x86_64-unknown-linux-musl ; cargo build --release ;'
+  - docker run --user=$UID --env HOME=/tmp --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder bash -c 'rustup default nightly-2017-12-20; rustup target add x86_64-unknown-linux-musl ; cargo build --release ;'
   - ./target/x86_64-unknown-linux-musl/release/sentence-aligner &
   - SERVICE_PID=$!
   - cargo test
