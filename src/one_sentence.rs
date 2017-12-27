@@ -7,7 +7,7 @@ use rocket::http::ContentType;
 use rocket_contrib::UUID;
 use postgres::error::UNIQUE_VIOLATION;
 use self::xml::reader::EventReader;
-use self::xml::reader::XmlEvent::Characters;
+use self::xml::reader::XmlEvent::{Characters, Whitespace};
 
 use self::uuid::Uuid;
 use std::io::Cursor;
@@ -145,24 +145,20 @@ fn edit_sentence_structure<'r>(
             .finalize();
     }
 
-    let row: String = rows.get(0).get("content");
-
-    /* remove all spaces for easier comparison after parser iteration */
-    let allowed_structure = str::replace(&row, " ", "");
-
+    let content: String = rows.get(0).get("content");
     let parser = EventReader::from_str(&text);
-    let mut structure_sentence = String::new();
+    let mut structure = String::new();
 
     for word in parser {
         match word {
-            Ok(Characters(name)) => {
-                structure_sentence += &name;
+            Ok(Characters(value)) | Ok(Whitespace(value)) => {
+                structure += &value;
             },
             _ => {}
         }
     }
 
-    if allowed_structure != structure_sentence {
+    if content != structure {
         return Response::build()
             .status(Status::BadRequest)
             .finalize();

@@ -182,12 +182,7 @@ fn test_put_sentence_structure_returns_200() {
         tests_commons::SERVICE_URL,
         sentence_uuid,
     );
-    let modified_structure = r#"
-        <subject>This</subject>
-        <verb>is</verb>
-        <complement>one</complement>
-        <complement>sentence</complement>
-    "#;
+    let modified_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>one</complement> <complement>sentence.</complement></sentence>";
     let response = client.put(&url)
         .body(modified_structure)
         .header(ContentType::xml())
@@ -222,7 +217,7 @@ fn test_put_sentence_structure_that_does_not_exist_returns_404() {
         uuid::Uuid::new_v4(),
     );
     let response = client.put(&url)
-        .body("<sentence>This is one sentence</sentence>")
+        .body("<sentence><subject>This</subject> <verb>is</verb> <complement>one</complement> <complement>sentence</complement></sentence>")
         .header(ContentType::xml())
         .send()
         .unwrap();
@@ -257,7 +252,7 @@ fn test_put_sentence_structure_that_does_not_match_content_returns_400() {
         &sentence_uuid,
     );
     let response = client.put(&url)
-        .body("<subject>I</subject><verb>eat</verb><complement>apple</complement>")
+        .body("<sentence><subject>I</subject> <verb>eat</verb> <complement>apple</complement></sentence>")
         .header(ContentType::xml())
         .send()
         .unwrap();
