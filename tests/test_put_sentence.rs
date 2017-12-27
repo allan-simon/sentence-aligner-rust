@@ -286,8 +286,9 @@ fn test_put_sentence_structure_with_untagged_words_returns_204() {
         tests_commons::SERVICE_URL,
         &sentence_uuid,
     );
+    let modified_structure = "<sentence><subject>This</subject> <verb>is</verb> one sentence.</sentence>";
     let response = client.put(&url)
-        .body("<sentence><subject>This</subject> <verb>is</verb> one sentence.</sentence>")
+        .body(modified_structure)
         .header(ContentType::xml())
         .send()
         .unwrap();
@@ -295,5 +296,13 @@ fn test_put_sentence_structure_with_untagged_words_returns_204() {
     assert_eq!(
         response.status(),
         StatusCode::NoContent,
+    );
+
+    assert_eq!(
+        db::get_structure(
+            &connection,
+            &sentence_uuid,
+        ),
+        modified_structure,
     );
 }
