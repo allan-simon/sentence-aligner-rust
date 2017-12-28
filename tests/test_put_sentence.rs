@@ -306,3 +306,38 @@ fn test_put_sentence_structure_with_untagged_words_returns_204() {
         modified_structure,
     );
 }
+
+#[test]
+fn test_put_sentence_structure_with_spaces_that_do_not_match_content() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let sentence_uuid = uuid::Uuid::new_v4();
+    let sentence_text = "This is one sentence.";
+    let sentence_iso639_3 = "eng";
+    db::insert_sentence(
+        &connection,
+        &sentence_uuid,
+        &sentence_text,
+        &sentence_iso639_3,
+    );
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/sentences/{}/structure",
+        tests_commons::SERVICE_URL,
+        &sentence_uuid,
+    );
+    let response = client.put(&url)
+        .body("<sentence><subject>This</subject><verb>is</verb><complement>one</complement><complement>sentence</complement></sentence>")
+        .header(ContentType::xml())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::BadRequest,
+    );
+}
