@@ -28,6 +28,8 @@ fn create_sentence<'r>(
     sentence: Json<Sentence>
 ) -> Response<'r> {
 
+    /* FIXME: #37 check if the structure and sentence match together */
+
     let result = connection.query(
         r#"
         INSERT INTO sentence(
