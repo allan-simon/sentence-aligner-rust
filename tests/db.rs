@@ -214,7 +214,10 @@ pub fn get_structure(
         .expect("0 results, expected one...")
     ;
 
-    row.get(0)
+    match row.get_opt(0) {
+        Some(Ok(data)) => data,
+        Some(Err(_)) | None => "".to_string()
+    }
 }
 
 /// Indicates if a language exists in database (iso639_3)
