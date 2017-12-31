@@ -51,13 +51,16 @@ fn create_sentence<'r>(
         Ok(rows) => rows,
         Err(ref e) => {
             if e.code() == Some(&UNIQUE_VIOLATION) {
-
-                return  Response::build()
+                return Response::build()
                     .status(Status::Conflict)
-                    .finalize()
-                ;
+                    .finalize();
             }
-            panic!(format!("{}", e));
+
+            /* FIXME: returns a bad request only
+               if there is a not found language id */
+            return Response::build()
+                .status(Status::BadRequest)
+                .finalize();
         }
     };
 
