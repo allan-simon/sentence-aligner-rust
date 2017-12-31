@@ -23,6 +23,10 @@ fn create_sentence<'r>(
     sentence: Json<Sentence>
 ) -> Response<'r> {
 
+    /* the language id is found using coalesce()
+       in order to force a relation error
+       if no language is found
+       (it prevents NULL to be inserted as the sentence language) */
     let result = connection.query(
         r#"
         INSERT INTO sentence(
@@ -32,7 +36,7 @@ fn create_sentence<'r>(
         ) VALUES (
             $1,
             $2,
-            (SELECT id FROM language WHERE iso639_3 = $3)
+            COALESCE((SELECT id FROM language WHERE iso639_3 = $3), 0)
         )
         RETURNING id
         "#,
