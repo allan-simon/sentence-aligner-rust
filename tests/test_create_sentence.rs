@@ -18,9 +18,15 @@ fn test_post_sentence_returns_200() {
     let connection = db::get_connection();
     db::clear(&connection);
 
+    let sentence_iso639_3 = "eng";
+    db::insert_language(
+        &connection,
+        &sentence_iso639_3,
+    );
+
     let mut json = HashMap::new();
     json.insert("text", "This is a sentence.");
-    json.insert("iso639_3", "eng");
+    json.insert("iso639_3", &sentence_iso639_3);
 
     let client = reqwest::Client::new();
 
