@@ -30,7 +30,7 @@
             "description": "The sentence object that has to be created.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Sentences"
+              "$ref": "#/definitions/Sentence"
             }
           }
         ],
@@ -46,8 +46,12 @@
     }
   },
   "definitions": {
-    "Sentences": {
+    "Sentence": {
       "type": "object",
+      "required": [
+        "text",
+        "iso639_3"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -55,11 +59,15 @@
         },
         "text": {
           "type": "string",
-          "example": "This is a sentence."
+          "example": "It rains."
         },
         "iso639_3": {
           "type": "string",
           "example": "eng"
+        },
+        "structure": {
+          "type": "string",
+          "example": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
         }
       }
     }
