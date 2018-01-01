@@ -2,9 +2,14 @@ extern crate uuid;
 
 use rocket::Response;
 use rocket_contrib::Json;
-use rocket::http::Status;
-use rocket::http::ContentType;
-use postgres::error::UNIQUE_VIOLATION;
+use rocket::http::{
+    Status,
+    ContentType,
+};
+use postgres::error::{
+    UNIQUE_VIOLATION,
+    FOREIGN_KEY_VIOLATION,
+};
 use std::io::Cursor;
 
 use db;
@@ -57,7 +62,7 @@ fn create_sentence<'r>(
                     .status(Status::Conflict)
                     .finalize();
             }
-            else if error == Some(&FOREIGN_KEY_VIOLATION) {
+            if error == Some(&FOREIGN_KEY_VIOLATION) {
                 return Response::build()
                     .status(Status::BadRequest)
                     .finalize();
