@@ -50,17 +50,20 @@ fn create_sentence<'r>(
     let rows = match result {
         Ok(rows) => rows,
         Err(ref e) => {
-            if e.code() == Some(&UNIQUE_VIOLATION) {
+
+            let error = e.code();
+            if error == Some(&UNIQUE_VIOLATION) {
                 return Response::build()
                     .status(Status::Conflict)
                     .finalize();
             }
+            else if error == Some(&FOREIGN_KEY_VIOLATION) {
+                return Response::build()
+                    .status(Status::BadRequest)
+                    .finalize();
+            }
 
-            /* FIXME: returns a bad request only
-               if there is a not found language id */
-            return Response::build()
-                .status(Status::BadRequest)
-                .finalize();
+            panic!(format!("{}", e));
         }
     };
 
