@@ -18,9 +18,15 @@ fn test_post_sentence_returns_200() {
     let connection = db::get_connection();
     db::clear(&connection);
 
+    let sentence_iso639_3 = "eng";
+    db::insert_language(
+        &connection,
+        &sentence_iso639_3,
+    );
+
     let mut json = HashMap::new();
     json.insert("text", "This is a sentence.");
-    json.insert("iso639_3", "eng");
+    json.insert("iso639_3", &sentence_iso639_3);
 
     let client = reqwest::Client::new();
 
@@ -79,5 +85,32 @@ fn test_post_sentence_with_used_uuid_returns_409() {
     assert_eq!(
         response.status(),
         StatusCode::Conflict,
+    );
+}
+
+#[test]
+fn test_post_sentence_with_non_existing_language_returns_400() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let mut json = HashMap::new();
+    json.insert("text", "This is a sentence.");
+    json.insert("iso639_3", "eng");
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/sentences",
+        tests_commons::SERVICE_URL,
+    );
+    let response = client.post(&url)
+        .json(&json)
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::BadRequest,
     );
 }

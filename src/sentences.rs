@@ -2,9 +2,14 @@ extern crate uuid;
 
 use rocket::Response;
 use rocket_contrib::Json;
-use rocket::http::Status;
-use rocket::http::ContentType;
-use postgres::error::UNIQUE_VIOLATION;
+use rocket::http::{
+    Status,
+    ContentType,
+};
+use postgres::error::{
+    UNIQUE_VIOLATION,
+    FOREIGN_KEY_VIOLATION,
+};
 use std::io::Cursor;
 
 use db;
@@ -32,7 +37,11 @@ fn create_sentence<'r>(
         ) VALUES (
             $1,
             $2,
-            (SELECT id FROM language WHERE iso639_3 = $3)
+            -- the language id is found using coalesce()
+            -- in order to force a relation error
+            -- if no language is found
+            -- (it prevents NULL to be inserted as the sentence language) */
+            COALESCE((SELECT id FROM language WHERE iso639_3 = $3), 0)
         )
         RETURNING id
         "#,
@@ -46,13 +55,19 @@ fn create_sentence<'r>(
     let rows = match result {
         Ok(rows) => rows,
         Err(ref e) => {
-            if e.code() == Some(&UNIQUE_VIOLATION) {
 
-                return  Response::build()
+            let error = e.code();
+            if error == Some(&UNIQUE_VIOLATION) {
+                return Response::build()
                     .status(Status::Conflict)
-                    .finalize()
-                ;
+                    .finalize();
             }
+            if error == Some(&FOREIGN_KEY_VIOLATION) {
+                return Response::build()
+                    .status(Status::BadRequest)
+                    .finalize();
+            }
+
             panic!(format!("{}", e));
         }
     };
