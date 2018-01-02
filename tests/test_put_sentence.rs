@@ -199,7 +199,7 @@ fn test_put_sentence_structure_returns_204() {
             &connection,
             &sentence_uuid,
         ),
-        modified_structure,
+        Some(modified_structure.to_string()),
     );
 }
 
@@ -303,7 +303,7 @@ fn test_put_sentence_structure_with_untagged_words_returns_204() {
             &connection,
             &sentence_uuid,
         ),
-        modified_structure,
+        Some(modified_structure.to_string()),
     );
 }
 

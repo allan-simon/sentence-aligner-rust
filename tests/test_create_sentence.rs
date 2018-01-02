@@ -78,7 +78,7 @@ fn test_post_sentence_without_structure_returns_200() {
             &connection,
             &sentence_uuid,
         ),
-        "".to_string(),
+        None,
     );
 }
 
@@ -117,7 +117,7 @@ fn test_post_sentence_with_structure_returns_200() {
             &connection,
             &sentence_uuid,
         ),
-        sentence_structure.to_string()
+        Some(sentence_structure.to_string())
     );
 }
 

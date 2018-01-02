@@ -195,7 +195,7 @@ pub fn get_language_by_sentence(
 pub fn get_structure(
     connection: &Connection,
     uuid: &uuid::Uuid,
-) -> String {
+) -> Option<String> {
 
     let result = connection.query(
         r#"
@@ -214,9 +214,11 @@ pub fn get_structure(
         .expect("0 results, expected one...")
     ;
 
+    /* get_opt(_) returns an error wrapped into an Option
+       object if the row exists and the structure column is null */
     match row.get_opt(0) {
-        Some(Ok(data)) => data,
-        Some(Err(_)) | None => "".to_string()
+        Some(Ok(data)) => Some(data),
+        Some(Err(_)) | None => None,
     }
 }
 
