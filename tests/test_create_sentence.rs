@@ -51,11 +51,17 @@ fn test_post_sentence_without_structure_returns_200() {
     let connection = db::get_connection();
     db::clear(&connection);
 
+    let sentence_language = "eng";
+    db::insert_language(
+        &connection,
+        &sentence_language,
+    );
+
     let mut json = HashMap::new();
     let sentence_uuid = uuid::Uuid::new_v4();
     json.insert("id", sentence_uuid.to_string());
     json.insert("text", "This is a sentence.".to_string());
-    json.insert("iso639_3", "eng".to_string());
+    json.insert("iso639_3", sentence_language.to_string());
 
     let client = reqwest::Client::new();
 
@@ -88,12 +94,18 @@ fn test_post_sentence_with_structure_returns_200() {
     let connection = db::get_connection();
     db::clear(&connection);
 
+    let sentence_language = "eng";
+    db::insert_language(
+        &connection,
+        &sentence_language,
+    );
+
     let mut json = HashMap::new();
     let sentence_uuid = uuid::Uuid::new_v4();
     let sentence_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>a</complement> <complement>sentence</complement></sentence>";
     json.insert("id", sentence_uuid.to_string());
     json.insert("text", "This is a sentence.".to_string());
-    json.insert("iso639_3", "eng".to_string());
+    json.insert("iso639_3", sentence_language.to_string());
     json.insert("structure", sentence_structure.to_string());
 
     let client = reqwest::Client::new();
