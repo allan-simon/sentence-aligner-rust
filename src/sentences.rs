@@ -28,12 +28,15 @@ fn create_sentence<'r>(
     sentence: Json<Sentence>
 ) -> Response<'r> {
 
+    /* FIXME: #37 check if the structure and sentence match together */
+
     let result = connection.query(
         r#"
         INSERT INTO sentence(
             id,
             content,
-            language_id
+            language_id,
+            structure
         ) VALUES (
             $1,
             $2,
@@ -41,7 +44,8 @@ fn create_sentence<'r>(
             -- in order to force a relation error
             -- if no language is found
             -- (it prevents NULL to be inserted as the sentence language) */
-            COALESCE((SELECT id FROM language WHERE iso639_3 = $3), 0)
+            COALESCE((SELECT id FROM language WHERE iso639_3 = $3), 0),
+            $4::TEXT::XML
         )
         RETURNING id
         "#,
@@ -49,6 +53,7 @@ fn create_sentence<'r>(
             &sentence.id.or_else(|| Some(uuid::Uuid::new_v4())),
             &sentence.text,
             &sentence.iso639_3,
+            &sentence.structure,
         ],
     );
 

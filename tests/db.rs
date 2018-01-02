@@ -195,7 +195,7 @@ pub fn get_language_by_sentence(
 pub fn get_structure(
     connection: &Connection,
     uuid: &uuid::Uuid,
-) -> String {
+) -> Option<String> {
 
     let result = connection.query(
         r#"
