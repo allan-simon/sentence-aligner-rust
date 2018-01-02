@@ -45,7 +45,7 @@ fn create_sentence<'r>(
             -- if no language is found
             -- (it prevents NULL to be inserted as the sentence language) */
             COALESCE((SELECT id FROM language WHERE iso639_3 = $3), 0),
-            $4::XML
+            $4::TEXT::XML
         )
         RETURNING id
         "#,
