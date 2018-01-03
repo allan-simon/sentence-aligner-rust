@@ -102,7 +102,7 @@ fn test_post_sentence_with_structure_returns_200() {
 
     let mut json = HashMap::new();
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>a</complement> <complement>sentence</complement></sentence>";
+    let sentence_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>a</complement> <complement>sentence</complement>.</sentence>";
     json.insert("id", sentence_uuid.to_string());
     json.insert("text", "This is a sentence.".to_string());
     json.insert("iso639_3", sentence_language.to_string());
