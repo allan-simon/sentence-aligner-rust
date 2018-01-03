@@ -1,4 +1,5 @@
 extern crate uuid;
+extern crate xml;
 
 use rocket::Response;
 use rocket_contrib::Json;
@@ -10,6 +11,9 @@ use postgres::error::{
     UNIQUE_VIOLATION,
     FOREIGN_KEY_VIOLATION,
 };
+use self::xml::reader::EventReader;
+use self::xml::reader::XmlEvent::{Characters, Whitespace};
+
 use std::io::Cursor;
 
 use db;
@@ -28,7 +32,26 @@ fn create_sentence<'r>(
     sentence: Json<Sentence>
 ) -> Response<'r> {
 
-    /* FIXME: #37 check if the structure and sentence match together */
+    if let Some(ref content) = sentence.structure {
+
+        let parser = EventReader::from_str(&content);
+        let mut structure = String::new();
+
+        for word in parser {
+            match word {
+                Ok(Characters(value)) | Ok(Whitespace(value)) => {
+                    structure += &value;
+                },
+                _ => {}
+            }
+        }
+
+        if sentence.text != structure {
+            return Response::build()
+                .status(Status::BadRequest)
+                .finalize();
+        }
+    }
 
     let result = connection.query(
         r#"

@@ -102,7 +102,7 @@ fn test_post_sentence_with_structure_returns_200() {
 
     let mut json = HashMap::new();
     let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>a</complement> <complement>sentence</complement></sentence>";
+    let sentence_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>a</complement> <complement>sentence</complement>.</sentence>";
     json.insert("id", sentence_uuid.to_string());
     json.insert("text", "This is a sentence.".to_string());
     json.insert("iso639_3", sentence_language.to_string());
@@ -185,6 +185,40 @@ fn test_post_sentence_with_non_existing_language_returns_400() {
     let mut json = HashMap::new();
     json.insert("text", "This is a sentence.");
     json.insert("iso639_3", "eng");
+
+    let client = reqwest::Client::new();
+
+    let url = format!(
+        "{}/sentences",
+        tests_commons::SERVICE_URL,
+    );
+    let response = client.post(&url)
+        .json(&json)
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::BadRequest,
+    );
+}
+
+#[test]
+fn test_post_sentence_structure_that_does_not_match_content_returns_400() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let sentence_iso639_3 = "eng";
+    db::insert_language(
+        &connection,
+        &sentence_iso639_3,
+    );
+
+    let mut json = HashMap::new();
+    json.insert("text", "This is a sentence.");
+    json.insert("iso639_3", &sentence_iso639_3);
+    json.insert("structure", "<sentence>Not matching structure.</sentence>");
 
     let client = reqwest::Client::new();
 
