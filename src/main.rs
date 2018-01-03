@@ -42,8 +42,9 @@ fn main() {
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             language_id INTEGER REFERENCES language (id) ON DELETE SET NULL,
             added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            content TEXT NOT NULL UNIQUE,
-            structure XML DEFAULT NULL
+            content TEXT NOT NULL,
+            structure XML DEFAULT NULL,
+            UNIQUE (language_id, content)
         )
         "#,
         &[],
