@@ -20,16 +20,14 @@ env:
 os:
   - linux
 rust:
-  # we force the Rust version to nightly-2017-12-20 because of a Ring package issue that broke Rocket on the latest Rust version (https://github.com/briansmith/ring/issues/598);
-  # TODO: #32 the used version must be set back to nightly as soon as the fix is available
-  - nightly-2017-12-20
+  - nightly
 services:
   - docker
   - postgresql
 before_script:
   - createdb -h $DB_HOST -U $DB_USER -w $DB_NAME
 script:
-  - docker run --user=$UID --env HOME=/tmp --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder bash -c 'rustup default nightly-2017-12-20; rustup target add x86_64-unknown-linux-musl ; cargo build --release ;'
+  - docker run --user=$UID --env HOME=/tmp --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder bash -c 'rustup default nightly; rustup target add x86_64-unknown-linux-musl ; cargo build --release ;'
   - ./target/x86_64-unknown-linux-musl/release/sentence-aligner &
   - SERVICE_PID=$!
   - cargo test
