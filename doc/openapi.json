@@ -67,6 +67,42 @@
           }
         }
       }
+    },
+    "/sentences/{sentence_id}": {
+      "get": {
+        "tags": [
+          "sentences"
+        ],
+        "summary": "Returns one sentence properties.",
+        "parameters": [
+          {
+            "name": "sentence_id",
+            "in": "path",
+            "description": "The sentence UUID.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succeed. Returns the requested sentence content.",
+            "schema": {
+              "$ref": "#/definitions/Sentence"
+            },
+            "examples": {
+              "application/json": {
+                "id": "4491-808e-405d-9fdd-0e853a383bcc",
+                "text": "It rains.",
+                "iso639_3": "eng",
+                "structure": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
+              }
+            }
+          },
+          "404": {
+            "description": "The requested sentence cannot be found."
+          }
+        }
+      }
     }
   },
   "definitions": {
