@@ -42,6 +42,32 @@
             "description": "The given UUID is already used by another sentence."
           }
         }
+      },
+      "get": {
+        "tags": [
+          "sentences"
+        ],
+        "summary": "Get all the sentences.",
+        "responses": {
+          "200": {
+            "description": "Returns all the sentences.",
+            "schema": {
+              "$ref": "#/definitions/sentences"
+            },
+            "examples": {
+              "application/json": {
+                [
+                  {
+                    "id": "4491-808e-405d-9fdd-0e853a383bcc",
+                    "text": "It rains.",
+                    "iso639_3": "eng",
+                    "structure": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
+                  }
+                ]
+              }
+            }
+          }
+        }
       }
     }
   },
