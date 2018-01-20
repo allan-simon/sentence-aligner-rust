@@ -96,6 +96,12 @@
           "example": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
         }
       }
+    },
+    "sentences": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Sentence"
+      }
     }
   }
 }
