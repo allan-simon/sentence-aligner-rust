@@ -103,6 +103,43 @@
           }
         }
       }
+    },
+    "/sentences/{sentence_id}/text": {
+      "put": {
+        "tags": [
+          "sentences"
+        ],
+        "summary": "Update the content of one sentence.",
+        "parameters": [
+          {
+            "name": "sentence_id",
+            "in": "path",
+            "description": "The sentence UUID.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "The new sentence content.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SentenceContent"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Succeed. The sentence content has been updated."
+          },
+          "404": {
+            "description": "The requested sentence cannot be found."
+          },
+          "409": {
+            "description": "A sentence with the same content and the same language already exists."
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -118,8 +155,7 @@
           "example": "313a4491-808e-405d-9fdd-0e853a383bcc"
         },
         "text": {
-          "type": "string",
-          "example": "It rains."
+          "$ref": "#/definitions/SentenceContent"
         },
         "iso639_3": {
           "type": "string",
@@ -130,6 +166,10 @@
           "example": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
         }
       }
+    },
+    "SentenceContent": {
+      "type": "string",
+      "example": "It rains."
     },
     "sentences": {
       "type": "array",
