@@ -56,6 +56,57 @@ fn test_put_sentence_text_returns_204() {
 }
 
 #[test]
+fn test_put_sentence_text_if_text_already_used_returns_409() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let language = "eng";
+    db::insert_language(
+        &connection,
+        language,
+    );
+
+    let first_sentence_uuid = uuid::Uuid::new_v4();
+    let first_sentence_text = "This is the first sentence content.";
+    db::insert_sentence(
+        &connection,
+        &first_sentence_uuid,
+        &first_sentence_text,
+        &language,
+    );
+
+    let second_sentence_uuid = uuid::Uuid::new_v4();
+    let second_sentence_text = "This is the second sentence content.";
+    db::insert_sentence(
+        &connection,
+        &second_sentence_uuid,
+        &second_sentence_text,
+        &language,
+    );
+
+    let client = reqwest::Client::new();
+
+    /* modifies the first sentence with the second sentence
+       content in order to trigger a conflict */
+    let url = format!(
+        "{}/sentences/{}/text",
+        tests_commons::SERVICE_URL,
+        first_sentence_uuid,
+    );
+    let response = client.put(&url)
+        .body(second_sentence_text)
+        .header(ContentType::plaintext())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::Conflict,
+    );
+}
+
+#[test]
 fn test_put_sentence_text_that_does_not_exist_returns_404() {
 
     let connection = db::get_connection();
