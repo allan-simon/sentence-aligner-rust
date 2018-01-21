@@ -92,12 +92,6 @@ fn edit_sentence_text<'r>(
     let not_found = match result {
         Ok(nbr_row_updated) => nbr_row_updated == 0,
         Err(ref e) => {
-            if e.code() == Some(&UNIQUE_VIOLATION) {
-                return  Response::build()
-                    .status(Status::Conflict)
-                    .finalize()
-                ;
-            }
             panic!(format!("{}", e));
         }
     };
