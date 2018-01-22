@@ -392,3 +392,60 @@ fn test_put_sentence_structure_with_spaces_that_do_not_match_content() {
         StatusCode::BadRequest,
     );
 }
+
+#[test]
+fn test_put_sentence_language_if_language_already_used_returns_409() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let first_language = "eng";
+    db::insert_language(
+        &connection,
+        first_language,
+    );
+
+    let second_language = "fra";
+    db::insert_language(
+        &connection,
+        second_language,
+    );
+
+    let common_text = "This is a common text.";
+
+    let first_sentence_uuid = uuid::Uuid::new_v4();
+    db::insert_sentence(
+        &connection,
+        &first_sentence_uuid,
+        &common_text,
+        &first_language,
+    );
+
+    let second_sentence_uuid = uuid::Uuid::new_v4();
+    db::insert_sentence(
+        &connection,
+        &second_sentence_uuid,
+        &common_text,
+        &second_language,
+    );
+
+    let client = reqwest::Client::new();
+
+    /* modifies the first sentence with the second sentence
+       language in order to trigger a conflict */
+    let url = format!(
+        "{}/sentences/{}/language",
+        tests_commons::SERVICE_URL,
+        first_sentence_uuid,
+    );
+    let response = client.put(&url)
+        .body(second_language)
+        .header(ContentType::plaintext())
+        .send()
+        .unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::Conflict,
+    );
+}

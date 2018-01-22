@@ -223,6 +223,13 @@ fn edit_sentence_language<'r>(
             Status::NotFound
         },
         Err(ref e) => {
+            if e.code() == Some(&UNIQUE_VIOLATION) {
+                return  Response::build()
+                    .status(Status::Conflict)
+                    .finalize()
+                ;
+            }
+
             panic!(format!("{}", e));
         }
     };

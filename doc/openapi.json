@@ -140,6 +140,43 @@
           }
         }
       }
+    },
+    "/sentences/{sentence_id}/language": {
+      "put": {
+        "tags": [
+          "sentences"
+        ],
+        "summary": "Update the language of one sentence.",
+        "parameters": [
+          {
+            "name": "sentence_id",
+            "in": "path",
+            "description": "The sentence UUID.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "The new sentence language.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SentenceLanguage"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Succeed. The sentence language has been updated."
+          },
+          "404": {
+            "description": "The requested sentence or the language cannot be found."
+          },
+          "409": {
+            "description": "A sentence with identical language and content than the edited sentence already exists."
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -158,8 +195,7 @@
           "$ref": "#/definitions/SentenceContent"
         },
         "iso639_3": {
-          "type": "string",
-          "example": "eng"
+          "$ref": "#/definitions/SentenceLanguage"
         },
         "structure": {
           "type": "string",
@@ -170,6 +206,10 @@
     "SentenceContent": {
       "type": "string",
       "example": "It rains."
+    },
+    "SentenceLanguage": {
+      "type": "string",
+      "example": "eng"
     },
     "sentences": {
       "type": "array",
