@@ -171,6 +171,9 @@
           },
           "404": {
             "description": "The requested sentence or the language cannot be found."
+          },
+          "409": {
+            "description": "A sentence with identical language and content than the edited sentence already exists."
           }
         }
       }
