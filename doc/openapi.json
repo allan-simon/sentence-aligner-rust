@@ -247,6 +247,10 @@
       "items": {
         "$ref": "#/definitions/Sentence"
       }
+    },
+    "Language": {
+      "type": "string",
+      "example": "eng"
     }
   }
 }
