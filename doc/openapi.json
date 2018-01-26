@@ -8,6 +8,10 @@
     {
       "name": "sentences",
       "description": "Operations on sentences"
+    },
+    {
+      "name": "languages",
+      "description": "Operations on languages"
     }
   ],
   "schemes": [
