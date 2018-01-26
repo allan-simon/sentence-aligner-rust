@@ -166,7 +166,7 @@ fn edit_sentence_structure<'r>(
 
     /* we add ::TEXT::XML because Postgresql query parameters need explicit cast:
        https://github.com/sfackler/rust-postgres/issues/309#issuecomment-351063887 */
-    let result = connection.execute(
+    let _ = connection.execute(
         r#"
             UPDATE sentence
             SET structure = $1::TEXT::XML
@@ -176,17 +176,7 @@ fn edit_sentence_structure<'r>(
             &text,
             &real_uuid,
         ],
-    );
-
-    if result.is_err() {
-        let error = result.unwrap_err();
-        if error.code() == Some(&UNIQUE_VIOLATION) {
-            return Response::build()
-                .status(Status::Conflict)
-                .finalize();
-        }
-        panic!(format!("{}", error));
-    }
+    ).unwrap();
 
     Response::build()
         .status(Status::NoContent)
