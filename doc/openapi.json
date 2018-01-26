@@ -8,6 +8,10 @@
     {
       "name": "sentences",
       "description": "Operations on sentences"
+    },
+    {
+      "name": "languages",
+      "description": "Operations on languages"
     }
   ],
   "schemes": [
@@ -177,6 +181,33 @@
           }
         }
       }
+    },
+    "/languages": {
+      "post": {
+        "tags": [
+          "languages"
+        ],
+        "summary": "Create one language.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "The language that has to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Language"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The language has been created."
+          },
+          "409": {
+            "description": "The language already exists."
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -216,6 +247,10 @@
       "items": {
         "$ref": "#/definitions/Sentence"
       }
+    },
+    "Language": {
+      "type": "string",
+      "example": "eng"
     }
   }
 }
