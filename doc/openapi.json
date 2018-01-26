@@ -256,6 +256,41 @@
         }
       }
     },
+    "/languages/{language}/sentences": {
+      "get": {
+        "tags": [
+          "sentences"
+        ],
+        "summary": "Get all the sentences with the given language.",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "path",
+            "description": "The language used to filter sentences.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all the sentences with the given language.",
+            "schema": {
+              "$ref": "#/definitions/sentences"
+            },
+            "examples": {
+              "application/json": [
+                {
+                  "id": "4491-808e-405d-9fdd-0e853a383bcc",
+                  "text": "It rains.",
+                  "iso639_3": "eng",
+                  "structure": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
     "/languages": {
       "post": {
         "tags": [
