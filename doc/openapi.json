@@ -145,6 +145,43 @@
         }
       }
     },
+    "/sentences/{sentence_id}/structure": {
+      "put": {
+        "tags": [
+          "sentences"
+        ],
+        "summary": "Update the structure of one sentence.",
+        "parameters": [
+          {
+            "name": "sentence_id",
+            "in": "path",
+            "description": "The sentence UUID.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "The new sentence structure.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SentenceStructure"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Succeed. The sentence structure has been updated."
+          },
+          "400": {
+            "description": "The sent structure does not match with the sentence content."
+          },
+          "404": {
+            "description": "The requested sentence cannot be found."
+          }
+        }
+      }
+    },
     "/sentences/{sentence_id}/language": {
       "put": {
         "tags": [
@@ -229,8 +266,7 @@
           "$ref": "#/definitions/SentenceLanguage"
         },
         "structure": {
-          "type": "string",
-          "example": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
+          "$ref": "#/definitions/SentenceStructure"
         }
       }
     },
@@ -241,6 +277,10 @@
     "SentenceLanguage": {
       "type": "string",
       "example": "eng"
+    },
+    "SentenceStructure": {
+      "type": "string",
+      "example": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
     },
     "sentences": {
       "type": "array",
