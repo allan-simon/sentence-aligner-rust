@@ -266,7 +266,7 @@
           {
             "name": "language",
             "in": "path",
-            "description": "The language used to filter sentences.",
+            "description": "The language used to filter sentences (iso 639-3 format).",
             "required": true,
             "type": "string"
           }
