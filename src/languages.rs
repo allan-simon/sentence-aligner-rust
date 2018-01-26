@@ -71,7 +71,6 @@ fn get_all_sentences_of_language<'r>(
 
     let mut sentences : Vec<Sentence> = Vec::with_capacity(100);
 
-
     for row in rows.iter() {
         let sentence = Sentence {
             id: row.get(0),
