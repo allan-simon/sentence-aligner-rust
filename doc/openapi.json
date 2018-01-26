@@ -235,8 +235,7 @@
           "$ref": "#/definitions/SentenceLanguage"
         },
         "structure": {
-          "type": "string",
-          "example": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
+          "$ref": "#/definitions/SentenceStructure"
         }
       }
     },
@@ -247,6 +246,10 @@
     "SentenceLanguage": {
       "type": "string",
       "example": "eng"
+    },
+    "SentenceStructure": {
+      "type": "string",
+      "example": "<sentence><subject>It</subject> <verb>rains</verb>.</sentence>"
     },
     "sentences": {
       "type": "array",
