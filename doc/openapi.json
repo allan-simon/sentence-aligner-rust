@@ -43,7 +43,7 @@
             "description": "The sentence has been created."
           },
           "409": {
-            "description": "The given UUID is already used by another sentence."
+            "description": "The given UUID is already used by another sentence or both of the language and content are already used by another sentence."
           }
         }
       },
