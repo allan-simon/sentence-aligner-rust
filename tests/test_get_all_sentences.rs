@@ -88,26 +88,27 @@ fn test_get_paginated_sentences() {
         &english_iso639_3,
     );
 
-    let url = format!(
+    let base_url = format!(
         "{}/sentences",
         tests_commons::SERVICE_URL,
     );
 
     /* insert multiple sentences with different
-       content and "consecutives" uuids */
+       content and "consecutives" uuids,
+       from a full-zeros uuid to x-x-x-x-...13 */
 
     let uuid_common = "00000000-0000-0000-0000-0000000000";
 
-    const SENTENCES_AMOUNT: usize = 15;
-    for id in 1..SENTENCES_AMOUNT {
+    const SENTENCE_MAX_INDEX: usize = 15;
+    for id in 1..SENTENCE_MAX_INDEX {
 
         /* ensure the uuids strings are all valid uuids */
 
         const UUIDS_PER_SET: usize = 10;
-        let uuid = if id < UUIDS_PER_SET {
-            format!("{}{}0", uuid_common, id)
+        let uuid = if id >= UUIDS_PER_SET {
+            format!("{}{}0", uuid_common, id - UUIDS_PER_SET)
         } else {
-            format!("{}0{}", uuid_common, id - UUIDS_PER_SET)
+            format!("{}0{}", uuid_common, id)
         };
 
         db::insert_sentence(
@@ -119,7 +120,7 @@ fn test_get_paginated_sentences() {
     }
 
     let url = Url::parse_with_params(
-        &url,
+        &base_url,
         &[("id", "00000000-0000-0000-0000-000000000000")],
     ).unwrap();
 
@@ -135,5 +136,27 @@ fn test_get_paginated_sentences() {
     assert_eq!(
         sentences.len(),
         10,
+    );
+
+    let last_sentence = sentences.last().unwrap();
+    let last_id = last_sentence.id.unwrap().to_string();
+
+    let url = Url::parse_with_params(
+        &base_url,
+        &[("id", last_id)],
+    ).unwrap();
+
+    let mut response = reqwest::get(url).unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::Ok,
+    );
+
+    let sentences = response.json::<tests_commons::Sentences>().unwrap();
+
+    assert_eq!(
+        sentences.len(),
+        3,
     );
 }
