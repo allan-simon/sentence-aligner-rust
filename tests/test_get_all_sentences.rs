@@ -3,7 +3,10 @@ extern crate uuid;
 
 #[macro_use] extern crate serde_derive;
 
-use reqwest::StatusCode;
+use reqwest::{
+    StatusCode,
+    Url,
+};
 
 mod db;
 
@@ -51,7 +54,12 @@ fn test_get_all_sentences_returns_200() {
         tests_commons::SERVICE_URL,
     );
 
-    let mut response = reqwest::get(&url).unwrap();
+    let url = Url::parse_with_params(
+        &url,
+        &[("id", "00000000-0000-0000-0000-000000000000")],
+    ).unwrap();
+
+    let mut response = reqwest::get(url).unwrap();
 
     assert_eq!(
         response.status(),
