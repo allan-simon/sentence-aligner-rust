@@ -98,20 +98,22 @@ fn test_get_paginated_sentences() {
 
     let uuid_common = "00000000-0000-0000-0000-0000000000";
 
-    for id in 1..10 {
-        db::insert_sentence(
-            &connection,
-            &uuid::Uuid::from_str(&format!("{}0{}", uuid_common, id)).unwrap(),
-            &format!("First set sentence {}", id),
-            &english_iso639_3,
-        );
-    }
+    const SENTENCES_AMOUNT: usize = 15;
+    for id in 1..SENTENCES_AMOUNT {
 
-    for id in 1..10 {
+        /* ensure the uuids strings are all valid uuids */
+
+        const UUIDS_PER_SET: usize = 10;
+        let uuid = if id < UUIDS_PER_SET {
+            format!("{}{}0", uuid_common, id)
+        } else {
+            format!("{}0{}", uuid_common, id - UUIDS_PER_SET)
+        };
+
         db::insert_sentence(
             &connection,
-            &uuid::Uuid::from_str(&format!("{}{}0", uuid_common, id)).unwrap(),
-            &format!("Second set sentence {}", id),
+            &uuid::Uuid::from_str(&uuid).unwrap(),
+            &format!("Sentence {}", id),
             &english_iso639_3,
         );
     }
