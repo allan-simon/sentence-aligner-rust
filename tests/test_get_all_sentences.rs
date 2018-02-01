@@ -8,6 +8,8 @@ use reqwest::{
     Url,
 };
 
+use std::str::FromStr;
+
 mod db;
 
 #[path = "../utils/tests_commons.rs"]
@@ -71,5 +73,65 @@ fn test_get_all_sentences_returns_200() {
     assert_eq!(
         sentences.len(),
         2,
+    );
+}
+
+#[test]
+fn test_get_paginated_sentences() {
+
+    let connection = db::get_connection();
+    db::clear(&connection);
+
+    let english_iso639_3 = "eng";
+    db::insert_language(
+        &connection,
+        &english_iso639_3,
+    );
+
+    let url = format!(
+        "{}/sentences",
+        tests_commons::SERVICE_URL,
+    );
+
+    /* insert multiple sentences with different
+       content and "consecutives" uuids */
+
+    let uuid_common = "00000000-0000-0000-0000-0000000000";
+
+    for id in 1..10 {
+        db::insert_sentence(
+            &connection,
+            &uuid::Uuid::from_str(&format!("{}0{}", uuid_common, id)).unwrap(),
+            &format!("First set sentence {}", id),
+            &english_iso639_3,
+        );
+    }
+
+    for id in 1..10 {
+        db::insert_sentence(
+            &connection,
+            &uuid::Uuid::from_str(&format!("{}{}0", uuid_common, id)).unwrap(),
+            &format!("Second set sentence {}", id),
+            &english_iso639_3,
+        );
+    }
+
+    let url = Url::parse_with_params(
+        &url,
+        &[("id", "00000000-0000-0000-0000-000000000000")],
+    ).unwrap();
+
+    let mut response = reqwest::get(url).unwrap();
+
+    assert_eq!(
+        response.status(),
+        StatusCode::Ok,
+    );
+
+    let sentences = response.json::<tests_commons::Sentences>().unwrap();
+
+    assert_eq!(
+        sentences.len(),
+        10,
     );
 }
