@@ -12,6 +12,28 @@ use self::postgres::params::{
     Host,
 };
 
+trait DatabaseHandler {
+
+    fn connect_and_clean() -> Self;
+}
+
+impl DatabaseHandler for Connection {
+
+    /// Creates a new connection instance and clean the whole database content
+    fn connect_and_clean() -> Connection {
+
+        let connection = Connection::connect(
+            create_connection_params_from_env(),
+            TlsMode::None,
+        ).unwrap();
+
+        connection.execute("TRUNCATE TABLE sentence;", &[]).unwrap();
+        connection.execute("TRUNCATE TABLE language CASCADE;", &[]).unwrap();
+
+        connection
+    }
+}
+
 /// Create the connection parameters from environment variables
 /// DB_USER
 /// DB_PASSWORD
