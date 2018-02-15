@@ -1,3 +1,4 @@
+extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
 
@@ -6,6 +7,12 @@ extern crate uuid;
 use reqwest::StatusCode;
 use reqwest::header::ContentType;
 
+use postgres::Connection;
+
+use db::DatabaseHandler;
+
+/* TODO: #52 apply the Connection encapsulation to the whole file,
+   so we can then simply get rid of this direct module inclusion */
 mod db;
 
 #[path = "../utils/tests_commons.rs"]
@@ -14,8 +21,7 @@ mod tests_commons;
 #[test]
 fn test_post_language_returns_200() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let client = reqwest::Client::new();
 
@@ -35,13 +41,7 @@ fn test_post_language_returns_200() {
         StatusCode::Created,
     );
 
-    assert!(
-        db::language_exists(
-            &connection,
-            &created_language,
-        ),
-        "The language has not been inserted."
-    );
+    connection.assert_language_exists(&created_language);
 }
 
 #[test]
