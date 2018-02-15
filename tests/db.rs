@@ -55,7 +55,7 @@ impl DatabaseHandler for Connection {
         )
         .expect("problem while getting language");
 
-        assert_eq!(rows.len(), 1);
+        assert_eq!(rows.len(), 1, "The language does not exist.");
     }
 }
 
