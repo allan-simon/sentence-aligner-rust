@@ -12,9 +12,11 @@ use self::postgres::params::{
     Host,
 };
 
-trait DatabaseHandler {
+pub trait DatabaseHandler {
 
     fn connect_and_clean() -> Self;
+
+    fn assert_language_exists(&self, iso639_3: &str);
 }
 
 impl DatabaseHandler for Connection {
@@ -31,6 +33,29 @@ impl DatabaseHandler for Connection {
         connection.execute("TRUNCATE TABLE language CASCADE;", &[]).unwrap();
 
         connection
+    }
+
+    /// Assertion to check if a given language exists from its iso639_3 name
+    ///
+    /// Args:
+    ///
+    /// `iso639_3` - the iso639_3 name of the language that must exists
+    fn assert_language_exists(
+        &self,
+        iso639_3: &str,
+    ) {
+
+        let rows = self.query(
+            r#"
+                SELECT 1
+                FROM language
+                WHERE iso639_3 = $1
+            "#,
+            &[&iso639_3]
+        )
+        .expect("problem while getting language");
+
+        assert_eq!(rows.len(), 1);
     }
 }
 
