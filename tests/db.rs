@@ -16,6 +16,8 @@ pub trait DatabaseHandler {
 
     fn connect_and_clean() -> Self;
 
+    fn insert_language(&self, iso639_3: &str);
+
     fn assert_language_exists(&self, iso639_3: &str);
 }
 
@@ -33,6 +35,25 @@ impl DatabaseHandler for Connection {
         connection.execute("TRUNCATE TABLE language CASCADE;", &[]).unwrap();
 
         connection
+    }
+
+    /// Inserts a language with a given iso639_3 name
+    ///
+    /// Args:
+    ///
+    /// `iso639_3` - the iso639_3 name of the language to insert
+    fn insert_language(
+        &self,
+        iso639_3: &str,
+    ) {
+
+        let _ = self.execute(
+            r#"
+            INSERT INTO language(iso639_3)
+            VALUES ($1)
+            "#,
+            &[&iso639_3]
+        );
     }
 
     /// Assertion to check if a given language exists from its iso639_3 name
