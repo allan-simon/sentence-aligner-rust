@@ -53,7 +53,8 @@ impl DatabaseHandler for Connection {
             VALUES ($1)
             "#,
             &[&iso639_3]
-        );
+        )
+        .expect("problem while inserting language");
     }
 
     /// Assertion to check if a given language exists from its iso639_3 name

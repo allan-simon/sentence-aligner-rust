@@ -71,8 +71,6 @@ fn test_post_language_that_already_exists_returns_409() {
 #[test]
 fn test_post_language_with_incorrect_iso639_3_length() {
 
-    let connection: Connection = DatabaseHandler::connect_and_clean();
-
     let client = reqwest::Client::new();
 
     let url = format!(
