@@ -11,8 +11,6 @@ use postgres::Connection;
 
 use db::DatabaseHandler;
 
-/* TODO: #52 apply the Connection encapsulation to the whole file,
-   so we can then simply get rid of this direct module inclusion */
 mod db;
 
 #[path = "../utils/tests_commons.rs"]
@@ -47,14 +45,10 @@ fn test_post_language_returns_200() {
 #[test]
 fn test_post_language_that_already_exists_returns_409() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let created_language = "eng";
-    db::insert_language(
-        &connection,
-        &created_language,
-    );
+    connection.insert_language(&created_language);
 
     let client = reqwest::Client::new();
 
@@ -76,9 +70,6 @@ fn test_post_language_that_already_exists_returns_409() {
 
 #[test]
 fn test_post_language_with_incorrect_iso639_3_length() {
-
-    let connection = db::get_connection();
-    db::clear(&connection);
 
     let client = reqwest::Client::new();
 
