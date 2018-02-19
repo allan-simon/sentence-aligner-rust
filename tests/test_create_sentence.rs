@@ -1,3 +1,4 @@
+extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
 
@@ -7,7 +8,11 @@ use std::collections::HashMap;
 
 use reqwest::StatusCode;
 
+use postgres::Connection;
+
 mod db;
+
+use db::DatabaseHandler;
 
 #[path = "../utils/tests_commons.rs"]
 mod tests_commons;
@@ -15,14 +20,10 @@ mod tests_commons;
 #[test]
 fn test_post_sentence_returns_200() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let sentence_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &sentence_iso639_3,
-    );
+    connection.insert_language(&sentence_iso639_3);
 
     let mut json = HashMap::new();
     json.insert("text", "This is a sentence.");
@@ -48,14 +49,10 @@ fn test_post_sentence_returns_200() {
 #[test]
 fn test_post_sentence_without_structure_returns_200() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let sentence_language = "eng";
-    db::insert_language(
-        &connection,
-        &sentence_language,
-    );
+    connection.insert_language(&sentence_language);
 
     let mut json = HashMap::new();
     let sentence_uuid = uuid::Uuid::new_v4();
@@ -91,14 +88,10 @@ fn test_post_sentence_without_structure_returns_200() {
 #[test]
 fn test_post_sentence_with_structure_returns_200() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let sentence_language = "eng";
-    db::insert_language(
-        &connection,
-        &sentence_language,
-    );
+    connection.insert_language(&sentence_language);
 
     let mut json = HashMap::new();
     let sentence_uuid = uuid::Uuid::new_v4();
@@ -136,19 +129,14 @@ fn test_post_sentence_with_structure_returns_200() {
 #[test]
 fn test_post_sentence_with_used_uuid_returns_409() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let sentence_iso639_3 = "fra";
-    db::insert_language(
-        &connection,
-        &sentence_iso639_3,
-    );
+    let sentence_iso639_3 = "eng";
+    connection.insert_language(&sentence_iso639_3);
 
     let sentence_uuid = uuid::Uuid::new_v4();
     let sentence_text = "This is one sentence.";
-    db::insert_sentence(
-        &connection,
+    connection.insert_sentence(
         &sentence_uuid,
         &sentence_text,
         &sentence_iso639_3,
@@ -179,8 +167,7 @@ fn test_post_sentence_with_used_uuid_returns_409() {
 #[test]
 fn test_post_sentence_with_non_existing_language_returns_400() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let _: Connection = DatabaseHandler::connect_and_clean();
 
     let mut json = HashMap::new();
     json.insert("text", "This is a sentence.");
@@ -206,14 +193,10 @@ fn test_post_sentence_with_non_existing_language_returns_400() {
 #[test]
 fn test_post_sentence_structure_that_does_not_match_content_returns_400() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let sentence_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &sentence_iso639_3,
-    );
+    connection.insert_language(&sentence_iso639_3);
 
     let mut json = HashMap::new();
     json.insert("text", "This is a sentence.");
@@ -240,18 +223,13 @@ fn test_post_sentence_structure_that_does_not_match_content_returns_400() {
 #[test]
 fn test_post_sentence_with_used_content_and_language_returns_409() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let sentence_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &sentence_iso639_3,
-    );
+    connection.insert_language(&sentence_iso639_3);
 
     let sentence_text = "This is one sentence.";
-    db::insert_sentence(
-        &connection,
+    connection.insert_sentence(
         &uuid::Uuid::new_v4(),
         &sentence_text,
         &sentence_iso639_3,
@@ -281,24 +259,16 @@ fn test_post_sentence_with_used_content_and_language_returns_409() {
 #[test]
 fn test_post_sentence_with_used_content_and_different_language_returns_200() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let first_sentence_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &first_sentence_iso639_3,
-    );
+    connection.insert_language(&first_sentence_iso639_3);
 
     let second_sentence_iso639_3 = "fra";
-    db::insert_language(
-        &connection,
-        &second_sentence_iso639_3,
-    );
+    connection.insert_language(&second_sentence_iso639_3);
 
     let sentence_text = "This is one sentence.";
-    db::insert_sentence(
-        &connection,
+    connection.insert_sentence(
         &uuid::Uuid::new_v4(),
         &sentence_text,
         &first_sentence_iso639_3,
