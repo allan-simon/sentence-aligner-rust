@@ -1,11 +1,16 @@
 extern crate reqwest;
 extern crate uuid;
+extern crate postgres;
 
 #[macro_use] extern crate serde_derive;
 
 use reqwest::StatusCode;
 
+use postgres::Connection;
+
 mod db;
+
+use db::DatabaseHandler;
 
 #[path = "../utils/tests_commons.rs"]
 mod tests_commons;
@@ -13,25 +18,17 @@ mod tests_commons;
 #[test]
 fn test_get_all_sentences_returns_200() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let first_english_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &first_english_iso639_3,
-    );
+    connection.insert_language(&first_english_iso639_3);
 
     let second_english_iso639_3 = "fra";
-    db::insert_language(
-        &connection,
-        &second_english_iso639_3,
-    );
+    connection.insert_language(&second_english_iso639_3);
 
     let first_english_uuid = uuid::Uuid::new_v4();
     let first_english_text = "This is one sentence";
-    db::insert_sentence(
-        &connection,
+    connection.insert_sentence(
         &first_english_uuid,
         &first_english_text,
         &first_english_iso639_3,
@@ -39,8 +36,7 @@ fn test_get_all_sentences_returns_200() {
 
     let second_english_uuid = uuid::Uuid::new_v4();
     let second_english_text = "This is a second sentence";
-    db::insert_sentence(
-        &connection,
+    connection.insert_sentence(
         &second_english_uuid,
         &second_english_text,
         &second_english_iso639_3,
