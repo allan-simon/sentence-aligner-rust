@@ -78,11 +78,9 @@ impl DatabaseHandler for Connection {
         let result = self.query(
             r#"
             INSERT INTO sentence(
-                id,
                 content,
                 language_id
             ) VALUES (
-                uuid_generate_v4(),
                 $1,
                 (SELECT id FROM language WHERE iso639_3 = $2)
             )
