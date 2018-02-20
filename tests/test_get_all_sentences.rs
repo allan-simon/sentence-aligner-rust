@@ -20,23 +20,17 @@ fn test_get_all_sentences_returns_200() {
 
     let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let first_english_iso639_3 = "eng";
-    connection.insert_language(&first_english_iso639_3);
+    let first_iso639_3 = "eng";
+    connection.insert_language(&first_iso639_3);
 
-    let second_english_iso639_3 = "fra";
-    connection.insert_language(&second_english_iso639_3);
+    let second_iso639_3 = "fra";
+    connection.insert_language(&second_iso639_3);
 
-    let first_english_text = "This is one sentence";
-    connection.insert_sentence(
-        &first_english_text,
-        &first_english_iso639_3,
-    );
+    let first_text = "This is one sentence";
+    connection.insert_sentence(&first_text, &first_iso639_3);
 
-    let second_english_text = "This is a second sentence";
-    connection.insert_sentence(
-        &second_english_text,
-        &second_english_iso639_3,
-    );
+    let second_text = "This is a second sentence";
+    connection.insert_sentence(&second_text, &second_iso639_3);
 
     let url = format!(
         "{}/sentences",
