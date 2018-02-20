@@ -75,29 +75,34 @@ impl DatabaseHandler for Connection {
         iso639_3: &str,
     ) -> uuid::Uuid {
 
-        let id = uuid::Uuid::new_v4();
-
-        let _ = self.execute(
+        let result = self.query(
             r#"
             INSERT INTO sentence(
                 id,
                 content,
                 language_id
             ) VALUES (
+                uuid_generate_v4(),
                 $1,
-                $2,
-                (SELECT id FROM language WHERE iso639_3 = $3)
+                (SELECT id FROM language WHERE iso639_3 = $2)
             )
+            RETURNING id
             "#,
             &[
-                &id,
                 &content,
                 &iso639_3,
             ]
-        )
-        .expect("problem while inserting sentence");
+        );
 
-        id
+        let rows = result.expect("problem while inserting sentence");
+
+        let sentence_uuid: uuid::Uuid = rows
+            .iter()
+            .next()
+            .expect("0 result, expected one")
+            .get(0);
+
+        sentence_uuid
     }
 
     /// Assertion to check if a given language exists from its iso639_3 name
