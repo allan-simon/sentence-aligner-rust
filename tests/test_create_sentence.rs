@@ -134,10 +134,8 @@ fn test_post_sentence_with_used_uuid_returns_409() {
     let sentence_iso639_3 = "eng";
     connection.insert_language(&sentence_iso639_3);
 
-    let sentence_uuid = uuid::Uuid::new_v4();
     let sentence_text = "This is one sentence.";
-    connection.insert_sentence(
-        &sentence_uuid,
+    let sentence_uuid = connection.insert_sentence(
         &sentence_text,
         &sentence_iso639_3,
     );
@@ -229,11 +227,7 @@ fn test_post_sentence_with_used_content_and_language_returns_409() {
     connection.insert_language(&sentence_iso639_3);
 
     let sentence_text = "This is one sentence.";
-    connection.insert_sentence(
-        &uuid::Uuid::new_v4(),
-        &sentence_text,
-        &sentence_iso639_3,
-    );
+    connection.insert_sentence(&sentence_text, &sentence_iso639_3);
 
     let mut json = HashMap::new();
     json.insert("text", sentence_text.to_string());
@@ -268,11 +262,7 @@ fn test_post_sentence_with_used_content_and_different_language_returns_200() {
     connection.insert_language(&second_sentence_iso639_3);
 
     let sentence_text = "This is one sentence.";
-    connection.insert_sentence(
-        &uuid::Uuid::new_v4(),
-        &sentence_text,
-        &first_sentence_iso639_3,
-    );
+    connection.insert_sentence(&sentence_text, &first_sentence_iso639_3);
 
     let mut json = HashMap::new();
     json.insert("text", sentence_text.to_string());

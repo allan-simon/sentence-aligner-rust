@@ -26,18 +26,14 @@ fn test_get_all_sentences_returns_200() {
     let second_english_iso639_3 = "fra";
     connection.insert_language(&second_english_iso639_3);
 
-    let first_english_uuid = uuid::Uuid::new_v4();
     let first_english_text = "This is one sentence";
     connection.insert_sentence(
-        &first_english_uuid,
         &first_english_text,
         &first_english_iso639_3,
     );
 
-    let second_english_uuid = uuid::Uuid::new_v4();
     let second_english_text = "This is a second sentence";
     connection.insert_sentence(
-        &second_english_uuid,
         &second_english_text,
         &second_english_iso639_3,
     );
