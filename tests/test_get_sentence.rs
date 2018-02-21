@@ -1,3 +1,4 @@
+extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
 
@@ -5,7 +6,11 @@ extern crate uuid;
 
 use reqwest::StatusCode;
 
+use postgres::Connection;
+
 mod db;
+
+use db::DatabaseHandler;
 
 #[path = "../utils/tests_commons.rs"]
 mod tests_commons;
@@ -13,28 +18,18 @@ mod tests_commons;
 #[test]
 fn test_get_sentence_if_exists_returns_200() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let sentence_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &sentence_iso639_3,
-    );
+    let iso639_3 = "eng";
+    connection.insert_language(&iso639_3);
 
-    let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence";
-    db::insert_sentence(
-        &connection,
-        &sentence_uuid,
-        &sentence_text,
-        &sentence_iso639_3,
-    );
+    let text = "This is one sentence";
+    let uuid = connection.insert_sentence(&text, &iso639_3);
 
     let url = format!(
         "{}/sentences/{}",
         tests_commons::SERVICE_URL,
-        sentence_uuid.to_string(),
+        uuid.to_string(),
     );
     let mut response = reqwest::get(&url).unwrap();
 
@@ -47,13 +42,13 @@ fn test_get_sentence_if_exists_returns_200() {
 
     assert_eq!(
         sentence.text,
-        sentence_text,
+        text,
         "Unexpected sentence text.",
     );
 
     assert_eq!(
         sentence.iso639_3,
-        sentence_iso639_3,
+        iso639_3,
         "Unexpected sentence language.",
     );
 }
@@ -61,15 +56,10 @@ fn test_get_sentence_if_exists_returns_200() {
 #[test]
 fn test_get_sentence_if_does_not_exist_returns_404() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
-
-    let sentence_uuid = uuid::Uuid::new_v4();
-
     let url = format!(
         "{}/sentences/{}",
         tests_commons::SERVICE_URL,
-        sentence_uuid.to_string(),
+        uuid::Uuid::new_v4().to_string(),
     );
     let response = reqwest::get(&url).unwrap();
 
