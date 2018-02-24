@@ -21,6 +21,8 @@ pub trait DatabaseHandler {
     fn insert_sentence(&self, content: &str, iso639_3: &str) -> uuid::Uuid;
 
     fn assert_language_exists(&self, iso639_3: &str);
+
+    fn assert_sentence_structure_equals(&self, uuid: &uuid::Uuid, structure: &str);
 }
 
 impl DatabaseHandler for Connection {
@@ -124,6 +126,46 @@ impl DatabaseHandler for Connection {
         .expect("problem while getting language");
 
         assert_eq!(rows.len(), 1, "The language does not exist.");
+    }
+
+    /// Assertion to check if the structure for the sentence at the given id is equals to the expected one
+    ///
+    /// Args:
+    ///
+    /// `uuid` - the sentence uuid of the sentence to check
+    /// `structure` - the expected structure for the sentence to check
+    fn assert_sentence_structure_equals(
+        &self,
+        uuid: &uuid::Uuid,
+        structure: &str,
+    ) {
+
+        let result = self.query(
+            r#"
+                SELECT structure::TEXT
+                FROM sentence
+                WHERE id = $1
+            "#,
+            &[&uuid]
+        );
+
+        let rows = result.expect("problem while getting sentence");
+
+        let row = rows
+            .iter()
+            .next() // there's only 1 result
+            .expect("0 results, expected one...")
+        ;
+
+        /* additional step: inference cannot be performed automatically here */
+        let current_structure: Option<String> = row.get(0);
+        let expected_structure = current_structure.unwrap();
+
+        assert_eq!(
+            structure,
+            expected_structure,
+            "The sentence structure is not the expected one.",
+        );
     }
 }
 
