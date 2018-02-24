@@ -202,12 +202,9 @@ fn test_put_sentence_structure_returns_204() {
         StatusCode::NoContent,
     );
 
-    assert_eq!(
-        db::get_structure(
-            &connection,
-            &uuid,
-        ),
-        Some(modified_structure.to_string()),
+    connection.assert_sentence_structure_equals(
+        &uuid,
+        &modified_structure,
     );
 }
 
@@ -289,12 +286,9 @@ fn test_put_sentence_structure_with_untagged_words_returns_204() {
         StatusCode::NoContent,
     );
 
-    assert_eq!(
-        db::get_structure(
-            &connection,
-            &uuid,
-        ),
-        Some(modified_structure.to_string()),
+    connection.assert_sentence_structure_equals(
+        &uuid,
+        &modified_structure,
     );
 }
 

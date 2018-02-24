@@ -117,12 +117,9 @@ fn test_post_with_structure_returns_200() {
         StatusCode::Created,
     );
 
-    assert_eq!(
-        db::get_structure(
-            &connection,
-            &uuid,
-        ),
-        Some(structure.to_string())
+    connection.assert_sentence_structure_equals(
+        &uuid,
+        &structure,
     );
 }
 
