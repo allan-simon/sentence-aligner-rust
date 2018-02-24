@@ -44,12 +44,9 @@ fn test_put_sentence_text_returns_204() {
         StatusCode::NoContent,
     );
 
-    assert_eq!(
-        db::get_sentence(
-            &connection,
-            &uuid,
-        ),
-        modified_sentence,
+    connection.assert_sentence_content_equals(
+        &uuid,
+        &modified_sentence,
     );
 }
 
