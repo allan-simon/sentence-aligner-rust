@@ -1,3 +1,4 @@
+extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
 
@@ -6,7 +7,11 @@ extern crate uuid;
 use reqwest::StatusCode;
 use reqwest::header::ContentType;
 
+use postgres::Connection;
+
 mod db;
+
+use db::DatabaseHandler;
 
 #[path = "../utils/tests_commons.rs"]
 mod tests_commons;
@@ -14,25 +19,18 @@ mod tests_commons;
 #[test]
 fn test_put_sentence_text_returns_204() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence.";
-    let sentence_iso639_3 = "eng";
-    db::insert_sentence(
-        &connection,
-        &sentence_uuid,
-        &sentence_text,
-        &sentence_iso639_3,
-    );
+    let text = "This is one sentence.";
+    let iso639_3 = "eng";
+    let uuid = connection.insert_sentence(&text, &iso639_3);
 
     let client = reqwest::Client::new();
 
     let url = format!(
         "{}/sentences/{}/text",
         tests_commons::SERVICE_URL,
-        sentence_uuid,
+        uuid,
     );
     let modified_sentence = "This is a modified sentence.";
     let response = client.put(&url)
@@ -49,7 +47,7 @@ fn test_put_sentence_text_returns_204() {
     assert_eq!(
         db::get_sentence(
             &connection,
-            &sentence_uuid,
+            &uuid,
         ),
         modified_sentence,
     );
@@ -58,32 +56,16 @@ fn test_put_sentence_text_returns_204() {
 #[test]
 fn test_put_sentence_text_if_text_already_used_returns_409() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let language = "eng";
-    db::insert_language(
-        &connection,
-        language,
-    );
+    let iso_639_3 = "eng";
+    connection.insert_language(&iso_639_3);
 
-    let first_sentence_uuid = uuid::Uuid::new_v4();
-    let first_sentence_text = "This is the first sentence content.";
-    db::insert_sentence(
-        &connection,
-        &first_sentence_uuid,
-        &first_sentence_text,
-        &language,
-    );
+    let first_text = "This is the first sentence content.";
+    let first_uuid = connection.insert_sentence(&first_text, &iso_639_3);
 
-    let second_sentence_uuid = uuid::Uuid::new_v4();
-    let second_sentence_text = "This is the second sentence content.";
-    db::insert_sentence(
-        &connection,
-        &second_sentence_uuid,
-        &second_sentence_text,
-        &language,
-    );
+    let second_text = "This is the second sentence content.";
+    connection.insert_sentence(&second_text, &iso_639_3);
 
     let client = reqwest::Client::new();
 
@@ -92,10 +74,10 @@ fn test_put_sentence_text_if_text_already_used_returns_409() {
     let url = format!(
         "{}/sentences/{}/text",
         tests_commons::SERVICE_URL,
-        first_sentence_uuid,
+        first_uuid,
     );
     let response = client.put(&url)
-        .body(second_sentence_text)
+        .body(second_text)
         .header(ContentType::plaintext())
         .send()
         .unwrap();
@@ -108,9 +90,6 @@ fn test_put_sentence_text_if_text_already_used_returns_409() {
 
 #[test]
 fn test_put_sentence_text_that_does_not_exist_returns_404() {
-
-    let connection = db::get_connection();
-    db::clear(&connection);
 
     let client = reqwest::Client::new();
 
@@ -134,39 +113,26 @@ fn test_put_sentence_text_that_does_not_exist_returns_404() {
 #[test]
 fn test_put_sentence_language_returns_204() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let sentence_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &sentence_iso639_3,
-    );
+    let first_iso639_3 = "eng";
+    connection.insert_language(&first_iso639_3);
 
-    let modified_language = "fra";
-    db::insert_language(
-        &connection,
-        &modified_language,
-    );
+    let text = "This is one sentence.";
+    let uuid = connection.insert_sentence(&text, &first_iso639_3);
 
-    let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence.";
-    db::insert_sentence(
-        &connection,
-        &sentence_uuid,
-        &sentence_text,
-        &sentence_iso639_3,
-    );
+    let second_iso639_3 = "fra";
+    connection.insert_language(&second_iso639_3);
 
     let client = reqwest::Client::new();
 
     let url = format!(
         "{}/sentences/{}/language",
         tests_commons::SERVICE_URL,
-        sentence_uuid,
+        uuid,
     );
     let response = client.put(&url)
-        .body(modified_language)
+        .body(second_iso639_3)
         .header(ContentType::plaintext())
         .send()
         .unwrap();
@@ -179,17 +145,14 @@ fn test_put_sentence_language_returns_204() {
     assert_eq!(
         db::get_language_by_sentence(
             &connection,
-            &sentence_uuid,
+            &uuid,
         ),
-        modified_language,
+        second_iso639_3,
     );
 }
 
 #[test]
 fn test_put_sentence_language_that_does_not_exist_returns_404() {
-
-    let connection = db::get_connection();
-    db::clear(&connection);
 
     let client = reqwest::Client::new();
 
@@ -213,25 +176,19 @@ fn test_put_sentence_language_that_does_not_exist_returns_404() {
 #[test]
 fn test_put_sentence_structure_returns_204() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence.";
-    let sentence_iso639_3 = "eng";
-    db::insert_sentence(
-        &connection,
-        &sentence_uuid,
-        &sentence_text,
-        &sentence_iso639_3,
-    );
+    let text = "This is one sentence.";
+    let iso639_3 = "eng";
+
+    let uuid = connection.insert_sentence(&text, &iso639_3);
 
     let client = reqwest::Client::new();
 
     let url = format!(
         "{}/sentences/{}/structure",
         tests_commons::SERVICE_URL,
-        sentence_uuid,
+        uuid,
     );
     let modified_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>one</complement> <complement>sentence.</complement></sentence>";
     let response = client.put(&url)
@@ -248,7 +205,7 @@ fn test_put_sentence_structure_returns_204() {
     assert_eq!(
         db::get_structure(
             &connection,
-            &sentence_uuid,
+            &uuid,
         ),
         Some(modified_structure.to_string()),
     );
@@ -256,9 +213,6 @@ fn test_put_sentence_structure_returns_204() {
 
 #[test]
 fn test_put_sentence_structure_that_does_not_exist_returns_404() {
-
-    let connection = db::get_connection();
-    db::clear(&connection);
 
     let client = reqwest::Client::new();
 
@@ -282,25 +236,18 @@ fn test_put_sentence_structure_that_does_not_exist_returns_404() {
 #[test]
 fn test_put_sentence_structure_that_does_not_match_content_returns_400() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence.";
-    let sentence_iso639_3 = "eng";
-    db::insert_sentence(
-        &connection,
-        &sentence_uuid,
-        &sentence_text,
-        &sentence_iso639_3,
-    );
+    let text = "This is one sentence.";
+    let iso639_3 = "eng";
+    let uuid = connection.insert_sentence(&text, &iso639_3);
 
     let client = reqwest::Client::new();
 
     let url = format!(
         "{}/sentences/{}/structure",
         tests_commons::SERVICE_URL,
-        &sentence_uuid,
+        &uuid,
     );
     let response = client.put(&url)
         .body("<sentence><subject>I</subject> <verb>eat</verb> <complement>apple</complement></sentence>")
@@ -317,25 +264,18 @@ fn test_put_sentence_structure_that_does_not_match_content_returns_400() {
 #[test]
 fn test_put_sentence_structure_with_untagged_words_returns_204() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence.";
-    let sentence_iso639_3 = "eng";
-    db::insert_sentence(
-        &connection,
-        &sentence_uuid,
-        &sentence_text,
-        &sentence_iso639_3,
-    );
+    let text = "This is one sentence.";
+    let iso639_3 = "eng";
+    let uuid = connection.insert_sentence(&text, &iso639_3);
 
     let client = reqwest::Client::new();
 
     let url = format!(
         "{}/sentences/{}/structure",
         tests_commons::SERVICE_URL,
-        &sentence_uuid,
+        &uuid,
     );
     let modified_structure = "<sentence><subject>This</subject> <verb>is</verb> one sentence.</sentence>";
     let response = client.put(&url)
@@ -352,7 +292,7 @@ fn test_put_sentence_structure_with_untagged_words_returns_204() {
     assert_eq!(
         db::get_structure(
             &connection,
-            &sentence_uuid,
+            &uuid,
         ),
         Some(modified_structure.to_string()),
     );
@@ -361,25 +301,18 @@ fn test_put_sentence_structure_with_untagged_words_returns_204() {
 #[test]
 fn test_put_sentence_structure_with_spaces_that_do_not_match_content() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let sentence_uuid = uuid::Uuid::new_v4();
-    let sentence_text = "This is one sentence.";
-    let sentence_iso639_3 = "eng";
-    db::insert_sentence(
-        &connection,
-        &sentence_uuid,
-        &sentence_text,
-        &sentence_iso639_3,
-    );
+    let text = "This is one sentence.";
+    let iso639_3 = "eng";
+    let uuid = connection.insert_sentence(&text, &iso639_3);
 
     let client = reqwest::Client::new();
 
     let url = format!(
         "{}/sentences/{}/structure",
         tests_commons::SERVICE_URL,
-        &sentence_uuid,
+        &uuid,
     );
     let response = client.put(&url)
         .body("<sentence><subject>This</subject><verb>is</verb><complement>one</complement><complement>sentence</complement></sentence>")
@@ -396,35 +329,22 @@ fn test_put_sentence_structure_with_spaces_that_do_not_match_content() {
 #[test]
 fn test_put_sentence_language_if_language_already_used_returns_409() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
     let first_language = "eng";
-    db::insert_language(
-        &connection,
-        first_language,
-    );
+    connection.insert_language(&first_language);
 
     let second_language = "fra";
-    db::insert_language(
-        &connection,
-        second_language,
-    );
+    connection.insert_language(&second_language);
 
     let common_text = "This is a common text.";
 
-    let first_sentence_uuid = uuid::Uuid::new_v4();
-    db::insert_sentence(
-        &connection,
-        &first_sentence_uuid,
+    let first_sentence_uuid = connection.insert_sentence(
         &common_text,
         &first_language,
     );
 
-    let second_sentence_uuid = uuid::Uuid::new_v4();
-    db::insert_sentence(
-        &connection,
-        &second_sentence_uuid,
+    connection.insert_sentence(
         &common_text,
         &second_language,
     );
