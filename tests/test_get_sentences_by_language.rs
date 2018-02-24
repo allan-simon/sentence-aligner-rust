@@ -1,3 +1,4 @@
+extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
 
@@ -5,7 +6,11 @@ extern crate uuid;
 
 use reqwest::StatusCode;
 
+use postgres::Connection;
+
 mod db;
+
+use db::DatabaseHandler;
 
 #[path = "../utils/tests_commons.rs"]
 mod tests_commons;
@@ -13,58 +18,27 @@ mod tests_commons;
 #[test]
 fn test_get_sentence_by_language_returns_200() {
 
-    let connection = db::get_connection();
-    db::clear(&connection);
+    let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let first_english_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &first_english_iso639_3,
-    );
+    let first_iso639_3 = "eng";
+    connection.insert_language(&first_iso639_3);
 
-    let second_english_iso639_3 = "eng";
-    db::insert_language(
-        &connection,
-        &second_english_iso639_3,
-    );
+    let second_iso639_3 = "fra";
+    connection.insert_language(&second_iso639_3);
 
-    let other_iso639_3 = "fra";
-    db::insert_language(
-        &connection,
-        &other_iso639_3,
-    );
+    let first_text = "This is one sentence";
+    connection.insert_sentence(&first_text, &first_iso639_3);
 
-    let first_english_uuid = uuid::Uuid::new_v4();
-    let first_english_text = "This is one sentence";
-    db::insert_sentence(
-        &connection,
-        &first_english_uuid,
-        &first_english_text,
-        &first_english_iso639_3,
-    );
+    let second_text = "This is a second sentence";
+    connection.insert_sentence(&second_text, &first_iso639_3);
 
-    let second_english_uuid = uuid::Uuid::new_v4();
-    let second_english_text = "This is a second sentence";
-    db::insert_sentence(
-        &connection,
-        &second_english_uuid,
-        &second_english_text,
-        &second_english_iso639_3,
-    );
-
-    let other_uuid = uuid::Uuid::new_v4();
-    let other_text = "Ceci est une phrase";
-    db::insert_sentence(
-        &connection,
-        &other_uuid,
-        &other_text,
-        &other_iso639_3,
-    );
+    let third_text = "Ceci est une phrase.";
+    connection.insert_sentence(&third_text, &second_iso639_3);
 
     let url = format!(
         "{}/languages/{}/sentences",
         tests_commons::SERVICE_URL,
-        first_english_iso639_3.to_string(),
+        first_iso639_3.to_string(),
     );
     let mut response = reqwest::get(&url).unwrap();
 
