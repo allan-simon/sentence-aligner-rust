@@ -25,6 +25,8 @@ pub trait DatabaseHandler {
     fn assert_sentence_structure_equals(&self, uuid: &uuid::Uuid, structure: &str);
 
     fn assert_sentence_content_equals(&self, uuid: &uuid::Uuid, content: &str);
+
+    fn assert_sentence_language_equals(&self, uuid: &uuid::Uuid, iso639_3: &str);
 }
 
 impl DatabaseHandler for Connection {
@@ -209,6 +211,47 @@ impl DatabaseHandler for Connection {
             "the sentence content is not the expected one.",
         );
     }
+
+    /// Assertion to check if the language for the sentence at the given id is equals to the expected one
+    ///
+    /// Args:
+    ///
+    /// `uuid` - the sentence uuid of the sentence to check
+    /// `iso639_3` - the expected language for the sentence to check
+    fn assert_sentence_language_equals(
+        &self,
+        uuid: &uuid::Uuid,
+        iso639_3: &str,
+    ) {
+
+        let result = self.query(
+            r#"
+                SELECT language.iso639_3
+                FROM sentence
+                JOIN language ON (sentence.language_id = language.id)
+                WHERE sentence.id = $1
+            "#,
+            &[&uuid]
+        );
+
+        let rows = result.expect("problem while getting sentence");
+
+        let row = rows
+            .iter()
+            .next() // there's only 1 result
+            .expect("0 results, expected one...")
+        ;
+
+        /* additional step: inference cannot be performed automatically here */
+        let current_iso639_3: Option<String> = row.get(0);
+        let expected_iso639_3 = current_iso639_3.unwrap();
+
+        assert_eq!(
+            iso639_3,
+            expected_iso639_3,
+            "the sentence language is not the expected one.",
+        );
+    }
 }
 
 /// Create the connection parameters from environment variables
@@ -225,42 +268,6 @@ fn create_connection_params_from_env() -> ConnectParams {
         )
         .database(&env::var("DB_NAME").expect("missing DB_NAME"))
         .build(Host::Tcp(env::var("DB_HOST").expect("missing DB_HOST")))
-}
-
-/// Returns the language text for a given sentence UUID
-///
-/// # Arguments:
-///
-/// `connection` - The PostgreSQL connection object
-/// `uuid` - The sentence UUID v4
-///
-/// NOTE: allow dead_code to prevent cargo test incorrect warnings
-/// (https://github.com/rust-lang/rust/issues/46379)
-#[allow(dead_code)]
-pub fn get_language_by_sentence(
-    connection: &Connection,
-    uuid: &uuid::Uuid,
-) -> String {
-
-    let result = connection.query(
-        r#"
-            SELECT language.iso639_3
-            FROM sentence
-            JOIN language ON (sentence.language_id = language.id)
-            WHERE sentence.id = $1
-        "#,
-        &[&uuid]
-    );
-
-    let rows = result.expect("problem while getting sentence");
-
-    let row = rows
-        .iter()
-        .next() // there's only 1 result
-        .expect("0 results, expected one...")
-    ;
-
-    row.get(0)
 }
 
 /// Returns the structure text for a given sentence UUID

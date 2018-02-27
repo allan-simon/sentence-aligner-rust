@@ -139,12 +139,9 @@ fn test_put_sentence_language_returns_204() {
         StatusCode::NoContent,
     );
 
-    assert_eq!(
-        db::get_language_by_sentence(
-            &connection,
-            &uuid,
-        ),
-        second_iso639_3,
+    connection.assert_sentence_language_equals(
+        &uuid,
+        &second_iso639_3,
     );
 }
 
