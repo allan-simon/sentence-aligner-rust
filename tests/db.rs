@@ -211,6 +211,47 @@ impl DatabaseHandler for Connection {
             "the sentence content is not the expected one.",
         );
     }
+
+    /// Assertion to check if the language for the sentence at the given id is equals to the expected one
+    ///
+    /// Args:
+    ///
+    /// `uuid` - the sentence uuid of the sentence to check
+    /// `iso639_3` - the expected language for the sentence to check
+    fn assert_sentence_language_equals(
+        &self,
+        uuid: &uuid::Uuid,
+        iso639_3: &str,
+    ) {
+
+        let result = self.query(
+            r#"
+                SELECT language.iso639_3
+                FROM sentence
+                JOIN language ON (sentence.language_id = language.id)
+                WHERE sentence.id = $1
+            "#,
+            &[&uuid]
+        );
+
+        let rows = result.expect("problem while getting sentence");
+
+        let row = rows
+            .iter()
+            .next() // there's only 1 result
+            .expect("0 results, expected one...")
+        ;
+
+        /* additional step: inference cannot be performed automatically here */
+        let current_iso639_3: Option<String> = row.get(0);
+        let expected_iso639_3 = current_iso639_3.unwrap();
+
+        assert_eq!(
+            iso639_3,
+            expected_iso639_3,
+            "the sentence language is not the expected one.",
+        );
+    }
 }
 
 /// Create the connection parameters from environment variables
