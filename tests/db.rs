@@ -25,6 +25,8 @@ pub trait DatabaseHandler {
     fn assert_sentence_structure_equals(&self, uuid: &uuid::Uuid, structure: &str);
 
     fn assert_sentence_content_equals(&self, uuid: &uuid::Uuid, content: &str);
+
+    fn assert_sentence_language_equals(&self, uuid: &uuid::Uuid, iso639_3: &str);
 }
 
 impl DatabaseHandler for Connection {
