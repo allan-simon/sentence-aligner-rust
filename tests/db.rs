@@ -307,38 +307,3 @@ fn create_connection_params_from_env() -> ConnectParams {
         .database(&env::var("DB_NAME").expect("missing DB_NAME"))
         .build(Host::Tcp(env::var("DB_HOST").expect("missing DB_HOST")))
 }
-
-/// Returns the structure text for a given sentence UUID
-///
-/// # Arguments:
-///
-/// `connection` - The PostgreSQL connection object
-/// `uuid` - The sentence UUID v4
-///
-/// NOTE: allow dead_code to prevent cargo test incorrect warnings
-/// (https://github.com/rust-lang/rust/issues/46379)
-#[allow(dead_code)]
-pub fn get_structure(
-    connection: &Connection,
-    uuid: &uuid::Uuid,
-) -> Option<String> {
-
-    let result = connection.query(
-        r#"
-            SELECT structure::TEXT
-            FROM sentence
-            WHERE id = $1
-        "#,
-        &[&uuid]
-    );
-
-    let rows = result.expect("problem while getting sentence");
-
-    let row = rows
-        .iter()
-        .next() // there's only 1 result
-        .expect("0 results, expected one...")
-    ;
-
-    row.get(0)
-}
