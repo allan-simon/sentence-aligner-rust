@@ -27,6 +27,8 @@ pub trait DatabaseHandler {
     fn assert_sentence_content_equals(&self, uuid: &uuid::Uuid, content: &str);
 
     fn assert_sentence_language_equals(&self, uuid: &uuid::Uuid, iso639_3: &str);
+
+    fn assert_sentence_structure_is_null(&self, uuid: &uuid::Uuid);
 }
 
 impl DatabaseHandler for Connection {
@@ -250,6 +252,42 @@ impl DatabaseHandler for Connection {
             iso639_3,
             expected_iso639_3,
             "the sentence language is not the expected one.",
+        );
+    }
+
+    /// Assertion that checks if a sentence structure is NULL
+    ///
+    /// Args:
+    ///
+    /// `uuid` - the UUID of the sentence to check
+    fn assert_sentence_structure_is_null(
+        &self,
+        uuid: &uuid::Uuid,
+    ) {
+
+        let result = self.query(
+            r#"
+                SELECT structure::TEXT
+                FROM sentence
+                WHERE id = $1
+            "#,
+            &[&uuid]
+        );
+
+        let rows = result.expect("problem while getting sentence");
+
+        let row = rows
+            .iter()
+            .next() // there's only 1 result
+            .expect("0 results, expected one...")
+        ;
+
+        /* additional step: inference cannot be performed automatically here */
+        let current_structure: Option<String> = row.get(0);
+
+        assert_eq!(
+            current_structure,
+            None,
         );
     }
 }
