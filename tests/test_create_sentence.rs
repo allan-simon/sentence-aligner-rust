@@ -76,13 +76,7 @@ fn test_post_sentence_without_structure_returns_200() {
         StatusCode::Created,
     );
 
-    assert_eq!(
-        db::get_structure(
-            &connection,
-            &uuid,
-        ),
-        None,
-    );
+    connection.assert_sentence_structure_is_null(&uuid);
 }
 
 #[test]
