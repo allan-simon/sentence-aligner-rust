@@ -36,8 +36,16 @@ impl DatabaseHandler for Connection {
     /// Creates a new connection instance and clean the whole database content
     fn connect_and_clean() -> Connection {
 
+        let builder = ConnectParams::builder()
+            .user(
+                &env::var("DB_USER").expect("missing DB_USER"),
+                Some(&env::var("DB_PASSWORD").expect("missing DB_PASSWORD")),
+            )
+            .database(&env::var("DB_NAME").expect("missing DB_NAME"))
+            .build(Host::Tcp(env::var("DB_HOST").expect("missing DB_HOST")));
+
         let connection = Connection::connect(
-            create_connection_params_from_env(),
+            builder,
             TlsMode::None,
         ).unwrap();
 
@@ -290,20 +298,4 @@ impl DatabaseHandler for Connection {
             None,
         );
     }
-}
-
-/// Create the connection parameters from environment variables
-/// DB_USER
-/// DB_PASSWORD
-/// DB_HOST
-/// DB_NAME
-/// we fail if any is missing
-fn create_connection_params_from_env() -> ConnectParams {
-    ConnectParams::builder()
-        .user(
-            &env::var("DB_USER").expect("missing DB_USER"),
-            Some(&env::var("DB_PASSWORD").expect("missing DB_PASSWORD")),
-        )
-        .database(&env::var("DB_NAME").expect("missing DB_NAME"))
-        .build(Host::Tcp(env::var("DB_HOST").expect("missing DB_HOST")))
 }
