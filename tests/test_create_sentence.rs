@@ -15,7 +15,7 @@ use reqwest::{
 
 use postgres::Connection;
 
-use rust_interface_tests_helper::lib::{
+use rust_interface_tests_helper::{
     ClientHandler,
     ResponseHandler,
 };
