@@ -1,14 +1,53 @@
 extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
+extern crate rust_interface_tests_helper;
 
 #[macro_use] extern crate serde_derive;
 
 use std::collections::HashMap;
 
-use reqwest::StatusCode;
+use reqwest::{
+    StatusCode,
+    Client,
+    Response,
+};
 
 use postgres::Connection;
+
+use rust_interface_tests_helper::lib::{
+    ClientHandler,
+    ResponseHandler,
+};
+
+trait HasBaseUrl {
+
+    fn get_base_url(&self) -> &str;
+}
+
+impl HasBaseUrl for Client {
+
+    /// Returns the service base URL.
+    fn get_base_url(&self) -> &str {
+        "http://localhost:8000"
+    }
+}
+
+trait SentenceHandler {
+
+    fn post_sentence(&self, json: &HashMap<&str, &str>) -> Response;
+}
+
+impl SentenceHandler for Client {
+
+    fn post_sentence(&self, json: &HashMap<&str, &str>) -> Response {
+
+        self.post_json(
+            &format!("{}/sentences", self.get_base_url()),
+            json,
+        )
+    }
+}
 
 mod db;
 
@@ -30,20 +69,9 @@ fn test_post_sentence_returns_200() {
     json.insert("iso639_3", &iso639_3);
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::Created,
-    );
+    response.assert_201();
 }
 
 #[test]

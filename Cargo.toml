@@ -22,3 +22,6 @@ r2d2_postgres = "0.13"
 reqwest = "0.8.1"
 
 xml-rs = "0.7.0"
+
+[dev-dependencies]
+rust-interface-tests-helper = { git = "https://github.com/jean553/rust-interface-tests-helper" }
