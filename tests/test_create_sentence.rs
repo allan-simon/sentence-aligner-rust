@@ -48,27 +48,18 @@ fn test_post_sentence_without_structure_returns_200() {
     let language = "eng";
     connection.insert_language(&language);
 
-    let mut json = HashMap::new();
     let uuid = uuid::Uuid::new_v4();
-    json.insert("id", uuid.to_string());
-    json.insert("text", "This is a sentence.".to_string());
-    json.insert("iso639_3", language.to_string());
+    let uuid_as_string = uuid.to_string();
+
+    let mut json: HashMap<&str, &str> = HashMap::new();
+    json.insert("id", &uuid_as_string);
+    json.insert("text", "This is a sentence.");
+    json.insert("iso639_3", language);
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::Created,
-    );
+    response.assert_201();
 
     connection.assert_sentence_structure_is_null(&uuid);
 }
@@ -81,29 +72,21 @@ fn test_post_with_structure_returns_200() {
     let language = "eng";
     connection.insert_language(&language);
 
-    let mut json = HashMap::new();
     let uuid = uuid::Uuid::new_v4();
+    let uuid_as_string = uuid.to_string();
+
+    let mut json: HashMap<&str, &str> = HashMap::new();
+
     let structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>a</complement> <complement>sentence</complement>.</sentence>";
-    json.insert("id", uuid.to_string());
-    json.insert("text", "This is a sentence.".to_string());
-    json.insert("iso639_3", language.to_string());
-    json.insert("structure", structure.to_string());
+    json.insert("id", &uuid_as_string);
+    json.insert("text", "This is a sentence.");
+    json.insert("iso639_3", language);
+    json.insert("structure", structure);
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::Created,
-    );
+    response.assert_201();
 
     connection.assert_sentence_structure_equals(
         &uuid,
@@ -246,23 +229,12 @@ fn test_post_sentence_with_used_content_and_different_language_returns_200() {
     let text = "This is one sentence.";
     connection.insert_sentence(&text, &first_iso639_3);
 
-    let mut json = HashMap::new();
-    json.insert("text", text.to_string());
-    json.insert("iso639_3", second_iso639_3.to_string());
+    let mut json: HashMap<&str, &str> = HashMap::new();
+    json.insert("text", text);
+    json.insert("iso639_3", second_iso639_3);
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::Created,
-    );
+    response.assert_201();
 }
