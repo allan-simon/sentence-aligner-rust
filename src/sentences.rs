@@ -2,7 +2,10 @@ extern crate uuid;
 extern crate xml;
 
 use rocket::Response;
-use rocket_contrib::Json;
+use rocket_contrib::{
+    Json,
+    UUID,
+};
 use rocket::http::{
     Status,
     ContentType,
@@ -13,6 +16,7 @@ use postgres::error::{
 };
 use self::xml::reader::EventReader;
 use self::xml::reader::XmlEvent::{Characters, Whitespace};
+use self::uuid::Uuid;
 
 use std::io::Cursor;
 
@@ -24,6 +28,11 @@ pub struct Sentence {
     pub text: String,
     pub iso639_3: String,
     pub structure: Option<String>,
+}
+
+#[derive(FromForm)]
+struct LastId {
+    pub id: UUID,
 }
 
 #[post("/sentences", format="application/json", data="<sentence>")]
@@ -113,11 +122,13 @@ fn create_sentence<'r>(
         .finalize()
 }
 
-
-#[get("/sentences")]
+#[get("/sentences?<last_id>")]
 fn get_all_sentences<'r>(
     connection: db::DbConnection,
+    last_id: LastId,
 ) -> Response<'r> {
+
+    let real_uuid : Uuid = *last_id.id;
 
     let result = connection.query(
         r#"
@@ -128,18 +139,18 @@ fn get_all_sentences<'r>(
                 structure::text
             FROM sentence
             JOIN language ON (sentence.language_id = language.id)
+            WHERE sentence.id > $1
             ORDER BY
                 added_at,
                 sentence.id
-            LIMIT 100
+            LIMIT 10
         "#,
-        &[],
+        &[&real_uuid],
     );
 
     let rows = result.expect("problem while getting sentence");
 
     let mut sentences : Vec<Sentence> = Vec::with_capacity(100);
-
 
     for row in rows.iter() {
         let sentence = Sentence {
