@@ -7,51 +7,17 @@ extern crate rust_interface_tests_helper;
 
 use std::collections::HashMap;
 
-use reqwest::{
-    StatusCode,
-    Client,
-    Response,
-};
+use reqwest::StatusCode;
 
 use postgres::Connection;
 
-use rust_interface_tests_helper::{
-    ClientHandler,
-    ResponseHandler,
-};
-
-trait HasBaseUrl {
-
-    fn get_base_url(&self) -> &str;
-}
-
-impl HasBaseUrl for Client {
-
-    /// Returns the service base URL.
-    fn get_base_url(&self) -> &str {
-        "http://localhost:8000"
-    }
-}
-
-trait SentenceHandler {
-
-    fn post_sentence(&self, json: &HashMap<&str, &str>) -> Response;
-}
-
-impl SentenceHandler for Client {
-
-    fn post_sentence(&self, json: &HashMap<&str, &str>) -> Response {
-
-        self.post_json(
-            &format!("{}/sentences", self.get_base_url()),
-            json,
-        )
-    }
-}
+use rust_interface_tests_helper::ResponseHandler;
 
 mod db;
+mod handlers;
 
 use db::DatabaseHandler;
+use handlers::SentenceHandler;
 
 #[path = "../utils/tests_commons.rs"]
 mod tests_commons;
