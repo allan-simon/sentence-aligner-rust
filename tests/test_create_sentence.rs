@@ -111,20 +111,9 @@ fn test_post_sentence_with_used_uuid_returns_409() {
     json.insert("iso639_3", iso639_3.to_string());
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::Conflict,
-    );
+    response.assert_409();
 }
 
 #[test]
@@ -137,20 +126,9 @@ fn test_post_sentence_with_non_existing_language_returns_400() {
     json.insert("iso639_3", "eng");
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::BadRequest,
-    );
+    response.assert_400();
 }
 
 #[test]
@@ -167,20 +145,9 @@ fn test_post_sentence_structure_that_does_not_match_content_returns_400() {
     json.insert("structure", "<sentence>Not matching structure.</sentence>");
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::BadRequest,
-    );
+    response.assert_400();
 }
 
 #[test]
@@ -199,24 +166,13 @@ fn test_post_sentence_with_used_content_and_language_returns_409() {
     json.insert("iso639_3", iso639_3.to_string());
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::Conflict,
-    );
+    response.assert_409();
 }
 
 #[test]
-fn test_post_sentence_with_used_content_and_different_language_returns_200() {
+fn test_post_sentence_with_used_content_and_different_language_returns_201() {
 
     let connection: Connection = DatabaseHandler::connect_and_clean();
 
