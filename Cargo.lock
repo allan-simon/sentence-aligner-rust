@@ -906,7 +906,7 @@ dependencies = [
 [[package]]
 name = "rust-interface-tests-helper"
 version = "0.1.0"
-source = "git+https://github.com/jean553/rust-interface-tests-helper#c632ac54024391121e679be30a63ef099ae396ff"
+source = "git+https://github.com/jean553/rust-interface-tests-helper#26cd08d139d2da8c5dd872088ee707adab109947"
 dependencies = [
  "reqwest 0.8.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
