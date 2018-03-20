@@ -5,9 +5,6 @@ extern crate rust_interface_tests_helper;
 
 #[macro_use] extern crate serde_derive;
 
-use reqwest::StatusCode;
-use reqwest::header::ContentType;
-
 use postgres::Connection;
 
 use rust_interface_tests_helper::ResponseHandler;
