@@ -7,8 +7,6 @@ extern crate rust_interface_tests_helper;
 
 use std::collections::HashMap;
 
-use reqwest::StatusCode;
-
 use postgres::Connection;
 
 use rust_interface_tests_helper::ResponseHandler;
