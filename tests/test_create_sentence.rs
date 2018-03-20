@@ -30,7 +30,7 @@ fn test_post_sentence_returns_200() {
     let iso639_3 = "eng";
     connection.insert_language(&iso639_3);
 
-    let mut json = HashMap::new();
+    let mut json: HashMap<&str, &str> = HashMap::new();
     json.insert("text", "This is a sentence.");
     json.insert("iso639_3", &iso639_3);
 
@@ -105,26 +105,17 @@ fn test_post_sentence_with_used_uuid_returns_409() {
     let text = "This is one sentence.";
     let uuid = connection.insert_sentence(&text, &iso639_3);
 
-    let mut json = HashMap::new();
-    json.insert("id", uuid.to_string());
-    json.insert("text", "Une autre phrase.".to_string());
-    json.insert("iso639_3", iso639_3.to_string());
+    let uuid_string = uuid.to_string();
+
+    let mut json: HashMap<&str, &str> = HashMap::new();
+    json.insert("id", &uuid_string);
+    json.insert("text", "Une autre phrase.");
+    json.insert("iso639_3", iso639_3);
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::Conflict,
-    );
+    response.assert_409();
 }
 
 #[test]
@@ -132,25 +123,14 @@ fn test_post_sentence_with_non_existing_language_returns_400() {
 
     let _: Connection = DatabaseHandler::connect_and_clean();
 
-    let mut json = HashMap::new();
+    let mut json: HashMap<&str, &str> = HashMap::new();
     json.insert("text", "This is a sentence.");
     json.insert("iso639_3", "eng");
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::BadRequest,
-    );
+    response.assert_400();
 }
 
 #[test]
@@ -161,26 +141,15 @@ fn test_post_sentence_structure_that_does_not_match_content_returns_400() {
     let iso639_3 = "eng";
     connection.insert_language(&iso639_3);
 
-    let mut json = HashMap::new();
+    let mut json: HashMap<&str, &str> = HashMap::new();
     json.insert("text", "This is a sentence.");
     json.insert("iso639_3", &iso639_3);
     json.insert("structure", "<sentence>Not matching structure.</sentence>");
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::BadRequest,
-    );
+    response.assert_400();
 }
 
 #[test]
@@ -194,29 +163,18 @@ fn test_post_sentence_with_used_content_and_language_returns_409() {
     let text = "This is one sentence.";
     connection.insert_sentence(&text, &iso639_3);
 
-    let mut json = HashMap::new();
-    json.insert("text", text.to_string());
-    json.insert("iso639_3", iso639_3.to_string());
+    let mut json: HashMap<&str, &str> = HashMap::new();
+    json.insert("text", text);
+    json.insert("iso639_3", iso639_3);
 
     let client = reqwest::Client::new();
+    let response = client.post_sentence(&json);
 
-    let url = format!(
-        "{}/sentences",
-        tests_commons::SERVICE_URL,
-    );
-    let response = client.post(&url)
-        .json(&json)
-        .send()
-        .unwrap();
-
-    assert_eq!(
-        response.status(),
-        StatusCode::Conflict,
-    );
+    response.assert_409();
 }
 
 #[test]
-fn test_post_sentence_with_used_content_and_different_language_returns_200() {
+fn test_post_sentence_with_used_content_and_different_language_returns_201() {
 
     let connection: Connection = DatabaseHandler::connect_and_clean();
 
