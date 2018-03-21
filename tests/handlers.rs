@@ -1,4 +1,5 @@
 extern crate reqwest;
+extern crate uuid;
 extern crate rust_interface_tests_helper;
 
 use reqwest::{
@@ -33,6 +34,8 @@ pub trait SentenceHandler {
     fn post_sentence(&self, json: &HashMap<&str, &str>) -> Response;
 
     fn get_all_sentences(&self) -> Response;
+
+    fn get_sentence(&self, uuid: &uuid::Uuid) -> Response;
 }
 
 impl LanguageHandler for Client {
@@ -82,5 +85,25 @@ impl SentenceHandler for Client {
     fn get_all_sentences(&self) -> Response {
 
         self.get_url(&format!("{}/sentences", self.get_base_url()))
+    }
+
+    /// Handles GET one sentence per UUID request.
+    ///
+    /// # Args:
+    ///
+    /// `uuid` - the UUID of the sentence to get
+    ///
+    /// # Returns:
+    ///
+    /// reqwest response
+    fn get_sentence(&self, uuid: &uuid::Uuid) -> Response {
+
+        self.get_url(
+            &format!(
+                "{}/sentences/{}",
+                self.get_base_url(),
+                uuid.to_string(),
+            )
+        )
     }
 }

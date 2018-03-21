@@ -1,6 +1,7 @@
 extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
+extern crate rust_interface_tests_helper;
 
 #[macro_use] extern crate serde_derive;
 
@@ -8,9 +9,13 @@ use reqwest::StatusCode;
 
 use postgres::Connection;
 
+use rust_interface_tests_helper::ResponseHandler;
+
 mod db;
+mod handlers;
 
 use db::DatabaseHandler;
+use handlers::SentenceHandler;
 
 #[path = "../utils/tests_commons.rs"]
 mod tests_commons;
@@ -26,17 +31,10 @@ fn test_get_sentence_if_exists_returns_200() {
     let text = "This is one sentence";
     let uuid = connection.insert_sentence(&text, &iso639_3);
 
-    let url = format!(
-        "{}/sentences/{}",
-        tests_commons::SERVICE_URL,
-        uuid.to_string(),
-    );
-    let mut response = reqwest::get(&url).unwrap();
+    let client = reqwest::Client::new();
+    let mut response = client.get_sentence(&uuid);
 
-    assert_eq!(
-        response.status(),
-        StatusCode::Ok,
-    );
+    response.assert_200();
 
     let sentence = response.json::<tests_commons::Sentence>().unwrap();
 
@@ -56,15 +54,9 @@ fn test_get_sentence_if_exists_returns_200() {
 #[test]
 fn test_get_sentence_if_does_not_exist_returns_404() {
 
-    let url = format!(
-        "{}/sentences/{}",
-        tests_commons::SERVICE_URL,
-        uuid::Uuid::new_v4().to_string(),
-    );
-    let response = reqwest::get(&url).unwrap();
+    let uuid_not_in_database = uuid::Uuid::new_v4();
 
-    assert_eq!(
-        response.status(),
-        StatusCode::NotFound,
-    );
+    let client = reqwest::Client::new();
+    let response = client.get_sentence(&uuid_not_in_database);
+    response.assert_404();
 }
