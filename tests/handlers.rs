@@ -31,6 +31,8 @@ pub trait LanguageHandler {
 pub trait SentenceHandler {
 
     fn post_sentence(&self, json: &HashMap<&str, &str>) -> Response;
+
+    fn get_all_sentences(&self) -> Response;
 }
 
 impl LanguageHandler for Client {
@@ -52,5 +54,10 @@ impl SentenceHandler for Client {
             &format!("{}/sentences", self.get_base_url()),
             json,
         )
+    }
+
+    fn get_all_sentences(&self) -> Response {
+
+        self.get_url(&format!("{}/sentences", self.get_base_url()))
     }
 }
