@@ -37,6 +37,15 @@ pub trait SentenceHandler {
 
 impl LanguageHandler for Client {
 
+    /// Handles POST language requests.
+    ///
+    /// # Args:
+    ///
+    /// `iso_639_3` - the language to post
+    ///
+    /// # Returns:
+    ///
+    /// reqwest response
     fn post_language(&self, iso_639_3: &str) -> Response {
 
         self.post_body(
@@ -48,6 +57,15 @@ impl LanguageHandler for Client {
 
 impl SentenceHandler for Client {
 
+    /// Handles POST sentence requests.
+    ///
+    /// # Args:
+    ///
+    /// `json` - sentence structure to post
+    ///
+    /// # Returns:
+    ///
+    /// reqwest response
     fn post_sentence(&self, json: &HashMap<&str, &str>) -> Response {
 
         self.post_json(
@@ -56,6 +74,11 @@ impl SentenceHandler for Client {
         )
     }
 
+    /// Handles GET all sentences requests.
+    ///
+    /// # Returns:
+    ///
+    /// reqwest response
     fn get_all_sentences(&self) -> Response {
 
         self.get_url(&format!("{}/sentences", self.get_base_url()))
