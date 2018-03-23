@@ -1,6 +1,7 @@
 extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
+extern crate rust_interface_tests_helper;
 
 #[macro_use] extern crate serde_derive;
 
@@ -9,9 +10,13 @@ use reqwest::header::ContentType;
 
 use postgres::Connection;
 
+use rust_interface_tests_helper::ResponseHandler;
+
 mod db;
+mod handlers;
 
 use db::DatabaseHandler;
+use handlers::SentenceHandler;
 
 #[path = "../utils/tests_commons.rs"]
 mod tests_commons;
@@ -177,24 +182,15 @@ fn test_put_sentence_structure_returns_204() {
 
     let uuid = connection.insert_sentence(&text, &iso639_3);
 
-    let client = reqwest::Client::new();
-
-    let url = format!(
-        "{}/sentences/{}/structure",
-        tests_commons::SERVICE_URL,
-        uuid,
-    );
     let modified_structure = "<sentence><subject>This</subject> <verb>is</verb> <complement>one</complement> <complement>sentence.</complement></sentence>";
-    let response = client.put(&url)
-        .body(modified_structure)
-        .header(ContentType::xml())
-        .send()
-        .unwrap();
 
-    assert_eq!(
-        response.status(),
-        StatusCode::NoContent,
+    let client = reqwest::Client::new();
+    let response = client.update_sentence_structure(
+        &uuid,
+        &modified_structure,
     );
+
+    response.assert_204();
 
     connection.assert_sentence_structure_equals(
         &uuid,
