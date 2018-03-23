@@ -38,6 +38,8 @@ pub trait SentenceHandler {
     fn get_sentence(&self, uuid: &uuid::Uuid) -> Response;
 
     fn get_sentences_by_language(&self, iso_639_3: &str) -> Response;
+
+    fn update_sentence_structure(&self, uuid: &uuid::Uuid, structure: &str) -> Response;
 }
 
 impl LanguageHandler for Client {
@@ -126,6 +128,32 @@ impl SentenceHandler for Client {
                 self.get_base_url(),
                 iso_639_3.to_string(),
             )
+        )
+    }
+
+    /// Handles PUT structure per sentence.
+    ///
+    /// # Args:
+    ///
+    /// `uuid` - the UUID of the sentence to update
+    /// `structure` - the new structure to apply
+    ///
+    /// # Returns:
+    ///
+    /// reqwest response
+    fn update_sentence_structure(
+        &self,
+        uuid: &uuid::Uuid,
+        structure: &str,
+    ) -> Response {
+
+        self.put_xml(
+            &format!(
+                "{}/sentences/{}/structure",
+                self.get_base_url(),
+                uuid.to_string(),
+            ),
+            structure,
         )
     }
 }
