@@ -36,6 +36,8 @@ pub trait SentenceHandler {
     fn get_all_sentences(&self) -> Response;
 
     fn get_sentence(&self, uuid: &uuid::Uuid) -> Response;
+
+    fn get_sentences_by_language(&self, iso_639_3: &str) -> Response;
 }
 
 impl LanguageHandler for Client {
@@ -103,6 +105,26 @@ impl SentenceHandler for Client {
                 "{}/sentences/{}",
                 self.get_base_url(),
                 uuid.to_string(),
+            )
+        )
+    }
+
+    /// Handles GET sentences per language.
+    ///
+    /// # Args:
+    ///
+    /// `iso_639_3` - the language to use
+    ///
+    /// # Returns:
+    ///
+    /// reqwest response
+    fn get_sentences_by_language(&self, iso_639_3: &str) -> Response {
+
+        self.get_url(
+            &format!(
+                "{}/languages/{}/sentences",
+                self.get_base_url(),
+                iso_639_3.to_string(),
             )
         )
     }
