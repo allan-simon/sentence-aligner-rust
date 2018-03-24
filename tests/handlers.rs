@@ -1,6 +1,6 @@
 extern crate reqwest;
 extern crate uuid;
-extern crate rust_interface_tests_helper;
+extern crate interface_tests_helpers;
 
 use reqwest::{
     Client,
@@ -9,7 +9,7 @@ use reqwest::{
 
 use std::collections::HashMap;
 
-use rust_interface_tests_helper::ClientHandler;
+use interface_tests_helpers::ClientHandler;
 
 pub trait HasBaseUrl {
 
