@@ -1,7 +1,7 @@
 extern crate postgres;
 extern crate reqwest;
 extern crate uuid;
-extern crate rust_interface_tests_helper;
+extern crate interface_tests_helpers;
 
 #[macro_use] extern crate serde_derive;
 
@@ -10,7 +10,7 @@ use reqwest::header::ContentType;
 
 use postgres::Connection;
 
-use rust_interface_tests_helper::ResponseHandler;
+use interface_tests_helpers::ResponseHandler;
 
 mod db;
 mod handlers;
