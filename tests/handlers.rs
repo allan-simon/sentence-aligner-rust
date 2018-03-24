@@ -40,6 +40,10 @@ pub trait SentenceHandler {
     fn get_sentences_by_language(&self, iso_639_3: &str) -> Response;
 
     fn update_sentence_structure(&self, uuid: &uuid::Uuid, structure: &str) -> Response;
+
+    fn update_sentence_text(&self, uuid: &uuid::Uuid, text: &str) -> Response;
+
+    fn update_sentence_language(&self, uuid: &uuid::Uuid, iso_639_3: &str) -> Response;
 }
 
 impl LanguageHandler for Client {
@@ -154,6 +158,58 @@ impl SentenceHandler for Client {
                 uuid.to_string(),
             ),
             structure,
+        )
+    }
+
+    /// Handles PUT text per sentence.
+    ///
+    /// # Args:
+    ///
+    /// `uuid` - the UUID of the sentence to update
+    /// `text` - the text to upload
+    ///
+    /// # Returns:
+    ///
+    /// reqwest response
+    fn update_sentence_text(
+        &self,
+        uuid: &uuid::Uuid,
+        text: &str,
+    ) -> Response {
+
+        self.put_text(
+            &format!(
+                "{}/sentences/{}/text",
+                self.get_base_url(),
+                uuid.to_string(),
+            ),
+            text,
+        )
+    }
+
+    /// Handles PUT language per sentence.
+    ///
+    /// # Args:
+    ///
+    /// `uuid` - the UUID of the sentence to update
+    /// `iso_639_3` - the language to upload
+    ///
+    /// # Returns:
+    ///
+    /// reqwest response
+    fn update_sentence_language(
+        &self,
+        uuid: &uuid::Uuid,
+        iso_639_3: &str,
+    ) -> Response {
+
+        self.put_text(
+            &format!(
+                "{}/sentences/{}/language",
+                self.get_base_url(),
+                uuid.to_string(),
+            ),
+            iso_639_3,
         )
     }
 }
