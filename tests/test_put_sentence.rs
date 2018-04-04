@@ -51,20 +51,25 @@ fn test_put_sentence_text_if_text_already_used_returns_409() {
 
     let connection: Connection = DatabaseHandler::connect_and_clean();
 
-    let iso_639_3 = "eng";
-    connection.insert_language(&iso_639_3);
+    let iso639_3 = "eng";
+    connection.insert_language(&iso639_3);
 
     let first_text = "This is the first sentence content.";
-    let first_uuid = connection.insert_sentence(&first_text, &iso_639_3);
+    let first_uuid = connection.insert_sentence(&first_text, &iso639_3);
 
     let second_text = "This is the second sentence content.";
-    connection.insert_sentence(&second_text, &iso_639_3);
+    connection.insert_sentence(&second_text, &iso639_3);
 
     let client = reqwest::Client::new();
-    let response = client.update_sentence_text(
+    let mut response = client.update_sentence_text(
         &first_uuid,
         &second_text,
     );
+
+    let sentence = response.json::<tests_commons::Sentence>().unwrap();
+
+    assert_eq!(sentence.text, second_text);
+    assert_eq!(sentence.iso639_3, iso639_3);
 
     response.assert_409();
 }
