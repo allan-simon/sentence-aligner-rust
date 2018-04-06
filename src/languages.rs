@@ -1,5 +1,3 @@
-extern crate uuid;
-
 use rocket::Response;
 use rocket::http::ContentType;
 use rocket::http::Status;

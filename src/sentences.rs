@@ -1,4 +1,3 @@
-extern crate uuid;
 extern crate xml;
 
 use rocket::Response;
@@ -14,13 +13,14 @@ use postgres::error::{
 use self::xml::reader::EventReader;
 use self::xml::reader::XmlEvent::{Characters, Whitespace};
 
+use uuid::Uuid;
 use std::io::Cursor;
 
 use db;
 
 #[derive(Deserialize, Serialize)]
 pub struct Sentence {
-    pub id: Option<uuid::Uuid>,
+    pub id: Option<Uuid>,
     pub text: String,
     pub iso639_3: String,
     pub structure: Option<String>,
@@ -73,7 +73,7 @@ fn create_sentence<'r>(
         RETURNING id
         "#,
         &[
-            &sentence.id.or_else(|| Some(uuid::Uuid::new_v4())),
+            &sentence.id.or_else(|| Some(Uuid::new_v4())),
             &sentence.text,
             &sentence.iso639_3,
             &sentence.structure,
@@ -100,7 +100,7 @@ fn create_sentence<'r>(
         }
     };
 
-    let sentence_uuid : uuid::Uuid = rows
+    let sentence_uuid: Uuid = rows
         .iter()
         .next() // there's only 1 result
         .expect("0 results, expected one...")

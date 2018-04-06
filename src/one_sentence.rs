@@ -1,4 +1,3 @@
-extern crate uuid;
 extern crate xml;
 
 use rocket::Response;
@@ -9,7 +8,7 @@ use postgres::error::UNIQUE_VIOLATION;
 use self::xml::reader::EventReader;
 use self::xml::reader::XmlEvent::{Characters, Whitespace};
 
-use self::uuid::Uuid;
+use uuid::Uuid;
 use std::io::Cursor;
 
 use db;
