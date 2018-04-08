@@ -6,7 +6,7 @@ authors = ["allan.simon@supinfo.com"]
 [dependencies]
 rocket = "0.3"
 rocket_codegen = "0.3"
-rocket_contrib = { version="0.3", features=["uuid", "json"]}
+rocket_contrib = { version="=0.3.6", features=["uuid", "json"]}
 
 serde = "1.0"
 serde_json = "1.0"
