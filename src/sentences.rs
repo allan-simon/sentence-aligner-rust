@@ -1,5 +1,3 @@
-extern crate xml;
-
 use rocket::Response;
 use rocket_contrib::Json;
 use rocket::http::{
@@ -10,8 +8,8 @@ use postgres::error::{
     UNIQUE_VIOLATION,
     FOREIGN_KEY_VIOLATION,
 };
-use self::xml::reader::EventReader;
-use self::xml::reader::XmlEvent::{Characters, Whitespace};
+use xml::reader::EventReader;
+use xml::reader::XmlEvent::{Characters, Whitespace};
 
 use uuid::Uuid;
 use std::io::Cursor;
