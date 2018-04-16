@@ -92,10 +92,17 @@ fn edit_sentence_text<'r>(
         Ok(nbr_row_updated) => nbr_row_updated == 0,
         Err(ref e) => {
             if e.code() == Some(&UNIQUE_VIOLATION) {
-                return  Response::build()
+
+                let sentence = get_sentence_by_content(
+                    &connection,
+                    &text,
+                );
+
+                return Response::build()
                     .status(Status::Conflict)
-                    .finalize()
-                ;
+                    .header(ContentType::JSON)
+                    .sized_body(Cursor::new(json!(sentence).to_string()))
+                    .finalize();
             }
             panic!(format!("{}", e));
         }
@@ -226,4 +233,49 @@ fn edit_sentence_language<'r>(
     return Response::build()
         .status(status)
         .finalize()
+}
+
+/// Returns a sentence object by its content. The function panics if no sentence is found.
+///
+/// Args:
+///
+/// `connection` - database connection handler
+/// `text` - the content of the sentence to find
+///
+/// Return:
+///
+/// the sentence with the given content
+fn get_sentence_by_content(
+    connection: &db::DbConnection,
+    text: &str,
+) -> Sentence {
+
+    let result = connection.query(
+        r#"
+            SELECT
+                sentence.id,
+                content,
+                language.iso639_3,
+                structure::text
+            FROM sentence
+            JOIN language ON (sentence.language_id = language.id)
+            WHERE sentence.content = $1
+        "#,
+        &[&text],
+    );
+
+    let rows = result.expect("problem while getting sentence");
+
+    let row = rows
+        .iter()
+        .next() // there's only 1 result
+        .expect("0 results, expected one...")
+    ;
+
+    Sentence {
+        id: row.get(0),
+        text: row.get(1),
+        iso639_3: row.get(2),
+        structure: row.get(3),
+    }
 }

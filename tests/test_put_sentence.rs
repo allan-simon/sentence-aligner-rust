@@ -61,10 +61,15 @@ fn test_put_sentence_text_if_text_already_used_returns_409() {
     connection.insert_sentence(&second_text, &iso_639_3);
 
     let client = reqwest::Client::new();
-    let response = client.update_sentence_text(
+    let mut response = client.update_sentence_text(
         &first_uuid,
         &second_text,
     );
+
+    let sentence = response.json::<tests_commons::Sentence>().unwrap();
+
+    assert_eq!(sentence.text, second_text);
+    assert_eq!(sentence.iso639_3, iso_639_3);
 
     response.assert_409();
 }
