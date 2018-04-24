@@ -218,10 +218,23 @@ fn edit_sentence_language<'r>(
         },
         Err(ref e) => {
             if e.code() == Some(&UNIQUE_VIOLATION) {
-                return  Response::build()
+
+                let content = get_sentence_content(
+                    &connection,
+                    sentence_uuid,
+                );
+
+                let sentence = get_sentence_by_content_and_language(
+                    &connection,
+                    &content,
+                    &text,
+                );
+
+                return Response::build()
                     .status(Status::Conflict)
-                    .finalize()
-                ;
+                    .header(ContentType::JSON)
+                    .sized_body(Cursor::new(json!(sentence).to_string()))
+                    .finalize();
             }
 
             panic!(format!("{}", e));
@@ -260,6 +273,96 @@ fn get_sentence_by_content(
             WHERE sentence.content = $1
         "#,
         &[&text],
+    );
+
+    let rows = result.expect("problem while getting sentence");
+
+    let row = rows
+        .iter()
+        .next() // there's only 1 result
+        .expect("0 results, expected one...")
+    ;
+
+    Sentence {
+        id: row.get(0),
+        text: row.get(1),
+        iso639_3: row.get(2),
+        structure: row.get(3),
+    }
+}
+
+/// Returns a sentence content by its sentence UUID. The function panics if the sentence is not found.
+///
+/// Args:
+///
+/// `connection` - database connection handler
+/// `sentence_uuid` - the uuid of the sentence
+///
+/// Return:
+///
+/// the sentence content
+fn get_sentence_content(
+    connection: &db::DbConnection,
+    sentence_uuid: UUID,
+) -> String {
+
+    let uuid: Uuid = *sentence_uuid;
+
+    let result = connection.query(
+        r#"
+            SELECT content
+            FROM sentence
+            WHERE id = $1
+        "#,
+        &[&uuid],
+    );
+
+    let rows = result.expect("problem while getting sentence");
+
+    let row = rows
+        .iter()
+        .next() // there's only 1 result
+        .expect("0 results, expected one...")
+    ;
+
+    let row: Option<String> = row.get(0);
+    row.unwrap()
+}
+
+/// Return a sentence by its content and its language. Panics if the sentence is not found.
+///
+/// Args:
+///
+/// `connection` - database connection handler
+/// `content` - the content of the sentence
+/// `language` - the language of the sentence
+///
+/// Returns:
+///
+/// a sentence object
+fn get_sentence_by_content_and_language(
+    connection: &db::DbConnection,
+    content: &str,
+    language: &str,
+) -> Sentence {
+
+    let result = connection.query(
+        r#"
+            SELECT
+                sentence.id,
+                content,
+                language.iso639_3,
+                structure::text
+            FROM sentence
+            JOIN language ON (sentence.language_id = language.id)
+            WHERE
+            sentence.content = $1 AND
+            language.iso639_3 = $2
+        "#,
+        &[
+            &content,
+            &language,
+        ],
     );
 
     let rows = result.expect("problem while getting sentence");
