@@ -219,14 +219,9 @@ fn edit_sentence_language<'r>(
         Err(ref e) => {
             if e.code() == Some(&UNIQUE_VIOLATION) {
 
-                let content = get_sentence_content(
-                    &connection,
-                    sentence_uuid,
-                );
-
                 let sentence = get_sentence_by_content_and_language(
                     &connection,
-                    &content,
+                    &real_uuid,
                     &text,
                 );
 
@@ -291,50 +286,12 @@ fn get_sentence_by_content(
     }
 }
 
-/// Returns a sentence content by its sentence UUID. The function panics if the sentence is not found.
+/// Return a sentence by its language and its uuid. Panics if the sentence is not found.
 ///
 /// Args:
 ///
 /// `connection` - database connection handler
-/// `sentence_uuid` - the uuid of the sentence
-///
-/// Return:
-///
-/// the sentence content
-fn get_sentence_content(
-    connection: &db::DbConnection,
-    sentence_uuid: UUID,
-) -> String {
-
-    let uuid: Uuid = *sentence_uuid;
-
-    let result = connection.query(
-        r#"
-            SELECT content
-            FROM sentence
-            WHERE id = $1
-        "#,
-        &[&uuid],
-    );
-
-    let rows = result.expect("problem while getting sentence");
-
-    let row = rows
-        .iter()
-        .next() // there's only 1 result
-        .expect("0 results, expected one...")
-    ;
-
-    let row: Option<String> = row.get(0);
-    row.unwrap()
-}
-
-/// Return a sentence by its content and its language. Panics if the sentence is not found.
-///
-/// Args:
-///
-/// `connection` - database connection handler
-/// `content` - the content of the sentence
+/// `sentence_uuid` - the sentence uuid
 /// `language` - the language of the sentence
 ///
 /// Returns:
@@ -342,7 +299,7 @@ fn get_sentence_content(
 /// a sentence object
 fn get_sentence_by_content_and_language(
     connection: &db::DbConnection,
-    content: &str,
+    sentence_uuid: &Uuid,
     language: &str,
 ) -> Sentence {
 
@@ -356,11 +313,15 @@ fn get_sentence_by_content_and_language(
             FROM sentence
             JOIN language ON (sentence.language_id = language.id)
             WHERE
-            sentence.content = $1 AND
+            sentence.content = (
+                SELECT content
+                FROM sentence
+                WHERE id = $1
+            ) AND
             language.iso639_3 = $2
         "#,
         &[
-            &content,
+            &sentence_uuid,
             &language,
         ],
     );
