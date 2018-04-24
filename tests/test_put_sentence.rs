@@ -248,10 +248,15 @@ fn test_put_sentence_language_if_language_already_used_returns_409() {
     );
 
     let client = reqwest::Client::new();
-    let response = client.update_sentence_language(
+    let mut response = client.update_sentence_language(
         &first_sentence_uuid,
         &second_language,
     );
+
+    let sentence = response.json::<tests_commons::Sentence>().unwrap();
+
+    assert_eq!(sentence.text, common_text);
+    assert_eq!(sentence.iso639_3, second_language);
 
     response.assert_409();
 }
