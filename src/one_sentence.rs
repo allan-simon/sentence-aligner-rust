@@ -219,7 +219,7 @@ fn edit_sentence_language<'r>(
         Err(ref e) => {
             if e.code() == Some(&UNIQUE_VIOLATION) {
 
-                let sentence = get_sentence_by_content_and_language(
+                let sentence = get_sentence_by_sentence_content_and_language(
                     &connection,
                     &real_uuid,
                     &text,
@@ -286,18 +286,18 @@ fn get_sentence_by_content(
     }
 }
 
-/// Return a sentence by its language and its uuid. Panics if the sentence is not found.
+/// Return a sentence by its language and its content (got from another sentence). Panics if the sentence is not found.
 ///
 /// Args:
 ///
 /// `connection` - database connection handler
-/// `sentence_uuid` - the sentence uuid
+/// `sentence_uuid` - the sentence uuid from which to get the content
 /// `language` - the language of the sentence
 ///
 /// Returns:
 ///
 /// a sentence object
-fn get_sentence_by_content_and_language(
+fn get_sentence_by_sentence_content_and_language(
     connection: &db::DbConnection,
     sentence_uuid: &Uuid,
     language: &str,
