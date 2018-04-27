@@ -111,7 +111,12 @@ fn test_post_sentence_with_used_uuid_returns_409() {
     json.insert("iso639_3", iso639_3);
 
     let client = reqwest::Client::new();
-    let response = client.post_sentence(&json);
+    let mut response = client.post_sentence(&json);
+
+    let sentence = response.json::<tests_commons::Sentence>().unwrap();
+
+    assert_eq!(sentence.text, text);
+    assert_eq!(sentence.iso639_3, iso639_3);
 
     response.assert_409();
 }
@@ -166,7 +171,12 @@ fn test_post_sentence_with_used_content_and_language_returns_409() {
     json.insert("iso639_3", iso639_3);
 
     let client = reqwest::Client::new();
-    let response = client.post_sentence(&json);
+    let mut response = client.post_sentence(&json);
+
+    let sentence = response.json::<tests_commons::Sentence>().unwrap();
+
+    assert_eq!(sentence.text, text);
+    assert_eq!(sentence.iso639_3, iso639_3);
 
     response.assert_409();
 }
