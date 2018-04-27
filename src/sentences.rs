@@ -51,6 +51,8 @@ fn create_sentence<'r>(
         }
     }
 
+    let uuid = sentence.id.or_else(|| Some(Uuid::new_v4())).unwrap();
+
     let result = connection.query(
         r#"
         INSERT INTO sentence(
@@ -71,7 +73,7 @@ fn create_sentence<'r>(
         RETURNING id
         "#,
         &[
-            &sentence.id.or_else(|| Some(Uuid::new_v4())),
+            &uuid,
             &sentence.text,
             &sentence.iso639_3,
             &sentence.structure,
@@ -84,8 +86,18 @@ fn create_sentence<'r>(
 
             let error = e.code();
             if error == Some(&UNIQUE_VIOLATION) {
+
+                let sentence = get_sentence_by_uuid_or_content_and_language(
+                    &connection,
+                    &uuid,
+                    &sentence.text,
+                    &sentence.iso639_3,
+                );
+
                 return Response::build()
                     .status(Status::Conflict)
+                    .header(ContentType::JSON)
+                    .sized_body(Cursor::new(json!(sentence).to_string()))
                     .finalize();
             }
             if error == Some(&FOREIGN_KEY_VIOLATION) {
@@ -155,3 +167,57 @@ fn get_all_sentences<'r>(
         .finalize()
 }
 
+/// Return a sentence by its UUID or its content and language.
+///
+/// Args:
+///
+/// `connection` - database connection handler
+/// `uuid` - the sentence uuid
+/// `content` - the sentence content
+/// `iso639_3` - the sentence language
+///
+/// Returns:
+///
+/// a sentence object
+fn get_sentence_by_uuid_or_content_and_language(
+    connection: &db::DbConnection,
+    uuid: &Uuid,
+    content: &str,
+    iso639_3: &str,
+) -> Sentence {
+
+    let result = connection.query(
+        r#"
+            SELECT
+                sentence.id,
+                content,
+                language.iso639_3,
+                structure::text
+            FROM sentence
+            JOIN language ON (sentence.language_id = language.id)
+            WHERE
+            sentence.id = $1 OR
+            (sentence.content = $2 AND language.iso639_3 = $3)
+        "#,
+        &[
+            &uuid,
+            &content,
+            &iso639_3,
+        ],
+    );
+
+    let rows = result.expect("problem while getting sentence");
+
+    let row = rows
+        .iter()
+        .next() // there's only 1 result
+        .expect("0 results, expected one...")
+    ;
+
+    Sentence {
+        id: row.get(0),
+        text: row.get(1),
+        iso639_3: row.get(2),
+        structure: row.get(3),
+    }
+}
