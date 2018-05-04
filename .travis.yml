@@ -20,14 +20,16 @@ env:
 os:
   - linux
 rust:
-  - nightly
+  # TODO: #103 temporarily downgrade Rust nightly to 2018-04-28, waiting for Rocket 0.3.* to be fixed concerning the usage of Rust (nightly) removed feature macro_reexport.
+  # (https://github.com/rust-lang/rust/issues/29638)
+  - nightly-2018-04-28
 services:
   - docker
   - postgresql
 before_script:
   - createdb -h $DB_HOST -U $DB_USER -w $DB_NAME
 script:
-  - docker run --user=$UID --env HOME=/tmp --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder bash -c 'rustup default nightly; rustup target add x86_64-unknown-linux-musl ; cargo build --release ;'
+  - docker run --user=$UID --env HOME=/tmp --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder bash -c 'rustup default nightly-2018-04-28; rustup target add x86_64-unknown-linux-musl ; cargo build --release ;'
   - ./target/x86_64-unknown-linux-musl/release/sentence-aligner &
   - SERVICE_PID=$!
   - cargo test
