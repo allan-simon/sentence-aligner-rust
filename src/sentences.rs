@@ -24,6 +24,11 @@ pub struct Sentence {
     pub structure: Option<String>,
 }
 
+#[derive(FromForm)]
+struct LastUuid {
+    starting_after_id: String,
+}
+
 #[post("/sentences", format="application/json", data="<sentence>")]
 fn create_sentence<'r>(
     connection: db::DbConnection,
@@ -148,18 +153,61 @@ fn get_all_sentences<'r>(
 
     let rows = result.expect("problem while getting sentence");
 
-    let mut sentences : Vec<Sentence> = Vec::with_capacity(100);
+    let sentences: Vec<Sentence> = rows.iter()
+        .map(|row| {
+            Sentence {
+                id: row.get(0),
+                text: row.get(1),
+                iso639_3: row.get(2),
+                structure: row.get(3),
+            }
+        })
+        .collect();
 
+    Response::build()
+        .header(ContentType::JSON)
+        .sized_body(Cursor::new(json!(sentences).to_string()))
+        .finalize()
+}
 
-    for row in rows.iter() {
-        let sentence = Sentence {
-            id: row.get(0),
-            text: row.get(1),
-            iso639_3: row.get(2),
-            structure: row.get(3),
-        };
-        sentences.push(sentence);
-    }
+#[get("/sentences?<last_uuid>")]
+fn get_all_sentences_with_last_uuid<'r>(
+    last_uuid: LastUuid,
+    connection: db::DbConnection,
+) -> Response<'r> {
+
+    let real_uuid: Uuid = Uuid::parse_str(&last_uuid.starting_after_id).unwrap();
+
+    let result = connection.query(
+        r#"
+            SELECT
+                sentence.id,
+                content,
+                language.iso639_3,
+                structure::text
+            FROM sentence
+            JOIN language ON (sentence.language_id = language.id)
+            WHERE sentence.id >= $1
+            ORDER BY
+                added_at,
+                sentence.id
+            LIMIT 100
+        "#,
+        &[&real_uuid],
+    );
+
+    let rows = result.expect("problem while getting sentence");
+
+    let sentences: Vec<Sentence> = rows.iter()
+        .map(|row| {
+            Sentence {
+                id: row.get(0),
+                text: row.get(1),
+                iso639_3: row.get(2),
+                structure: row.get(3),
+            }
+        })
+        .collect();
 
     Response::build()
         .header(ContentType::JSON)

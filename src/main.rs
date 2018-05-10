@@ -1,4 +1,4 @@
-#![feature(plugin)]
+#![feature(plugin, custom_derive)]
 #![plugin(rocket_codegen)]
 
 extern crate rocket;
@@ -61,6 +61,7 @@ fn main() {
             routes![
                 sentences::create_sentence,
                 sentences::get_all_sentences,
+                sentences::get_all_sentences_with_last_uuid,
                 one_sentence::get_sentence,
                 one_sentence::edit_sentence_text,
                 one_sentence::edit_sentence_structure,
