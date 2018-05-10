@@ -52,6 +52,17 @@
           "sentences"
         ],
         "summary": "Get all the sentences.",
+        "parameters": [
+          {
+            "in": "query",
+            "required": true,
+            "name": "starting_after_id",
+            "schema": {
+              "type": "uuid"
+            },
+            "description": "last uuid for pagination"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Returns all the sentences.",
