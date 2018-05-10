@@ -20,6 +20,8 @@ pub trait DatabaseHandler {
 
     fn insert_sentence(&self, content: &str, iso639_3: &str) -> uuid::Uuid;
 
+    fn insert_sentence_with_uuid(&self, uuid: &uuid::Uuid, content: &str, iso639_3: &str);
+
     fn assert_language_exists(&self, iso639_3: &str);
 
     fn assert_sentence_structure_equals(&self, uuid: &uuid::Uuid, structure: &str);
@@ -117,6 +119,37 @@ impl DatabaseHandler for Connection {
             .get(0);
 
         sentence_uuid
+    }
+
+    ///
+    /// TODO
+    ///
+    fn insert_sentence_with_uuid(
+        &self,
+        uuid: &uuid::Uuid,
+        content: &str,
+        iso639_3: &str,
+    ) {
+
+        let _ = self.query(
+            r#"
+            INSERT INTO sentence(
+                id,
+                content,
+                language_id
+            ) VALUES (
+                $1,
+                $2,
+                (SELECT id FROM language WHERE iso639_3 = $3)
+            )
+            RETURNING id
+            "#,
+            &[
+                &uuid,
+                &content,
+                &iso639_3,
+            ]
+        );
     }
 
     /// Assertion to check if a given language exists from its iso639_3 name

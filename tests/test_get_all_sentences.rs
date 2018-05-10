@@ -50,7 +50,11 @@ fn test_get_all_sentences_with_last_id_returns_200() {
 
     let connection: Connection = DatabaseHandler::connect_and_clean();
 
+    let first_iso639_3 = "eng";
+    connection.insert_language(&first_iso639_3);
+
     let uuid = uuid::Uuid::new_v4();
+    connection.insert_sentence_with_uuid(&uuid, "first sentence", &first_iso639_3);
 
     let client = reqwest::Client::new();
     let mut response = client.get_all_sentences_with_last_uuid(&uuid);
