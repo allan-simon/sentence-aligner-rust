@@ -97,14 +97,16 @@ impl SentenceHandler for Client {
         self.get_url(&format!("{}/sentences", self.get_base_url()))
     }
 
+    /// Handles GET all sentences with last_uuid requests.
     ///
-    /// TODO
+    /// # Returns:
     ///
+    /// reqwest response
     fn get_all_sentences_with_last_uuid(&self, uuid: &uuid::Uuid) -> Response {
 
         self.get_url(
             &format!(
-                "{}/sentences?last_id={}",
+                "{}/sentences?starting_after_id={}",
                 self.get_base_url(),
                 uuid.to_string(),
             )

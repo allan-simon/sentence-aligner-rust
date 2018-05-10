@@ -25,8 +25,8 @@ pub struct Sentence {
 }
 
 #[derive(FromForm)]
-struct LastId {
-    last_id: String,
+struct LastUuid {
+    starting_after_id: String,
 }
 
 #[post("/sentences", format="application/json", data="<sentence>")]
@@ -170,16 +170,13 @@ fn get_all_sentences<'r>(
         .finalize()
 }
 
-///
-/// TODO
-///
-#[get("/sentences?<last_id>")]
-fn get_all_sentences_with_last_id<'r>(
-    last_id: LastId,
+#[get("/sentences?<last_uuid>")]
+fn get_all_sentences_with_last_uuid<'r>(
+    last_uuid: LastUuid,
     connection: db::DbConnection,
 ) -> Response<'r> {
 
-    let real_uuid: Uuid = Uuid::parse_str(&last_id.last_id).unwrap();
+    let real_uuid: Uuid = Uuid::parse_str(&last_uuid.starting_after_id).unwrap();
 
     let result = connection.query(
         r#"
