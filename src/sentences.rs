@@ -190,7 +190,7 @@ fn get_all_sentences_with_last_id<'r>(
                 structure::text
             FROM sentence
             JOIN language ON (sentence.language_id = language.id)
-            WHERE sentence.id > $1
+            WHERE sentence.id >= $1
             ORDER BY
                 added_at,
                 sentence.id
