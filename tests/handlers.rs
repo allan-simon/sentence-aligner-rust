@@ -35,6 +35,8 @@ pub trait SentenceHandler {
 
     fn get_all_sentences(&self) -> Response;
 
+    fn get_all_sentences_with_last_uuid(&self, uuid: &uuid::Uuid) -> Response;
+
     fn get_sentence(&self, uuid: &uuid::Uuid) -> Response;
 
     fn get_sentences_by_language(&self, iso_639_3: &str) -> Response;
@@ -93,6 +95,20 @@ impl SentenceHandler for Client {
     fn get_all_sentences(&self) -> Response {
 
         self.get_url(&format!("{}/sentences", self.get_base_url()))
+    }
+
+    ///
+    /// TODO
+    ///
+    fn get_all_sentences_with_last_uuid(&self, uuid: &uuid::Uuid) -> Response {
+
+        self.get_url(
+            &format!(
+                "{}/sentences?last_id={}",
+                self.get_base_url(),
+                uuid.to_string(),
+            )
+        )
     }
 
     /// Handles GET one sentence per UUID request.

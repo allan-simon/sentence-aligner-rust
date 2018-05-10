@@ -44,3 +44,15 @@ fn test_get_all_sentences_returns_200() {
     let sentences = response.json::<tests_commons::Sentences>().unwrap();
     assert_eq!(sentences.len(), 2);
 }
+
+#[test]
+fn test_get_all_sentences_with_last_id_returns_200() {
+
+    let connection: Connection = DatabaseHandler::connect_and_clean();
+
+    let uuid = uuid::Uuid::new_v4();
+
+    let client = reqwest::Client::new();
+    let mut response = client.get_all_sentences_with_last_uuid(&uuid);
+    response.assert_200();
+}
